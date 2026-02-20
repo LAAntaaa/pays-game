@@ -1,1625 +1,2036 @@
-"""
-╔══════════════════════════════════════════════════════════════╗
-║           PAYS GAME — Client Kivy (Mobile/Desktop)           ║
-║                                                              ║
-║  Installation :                                              ║
-║    pip install kivy websockets                               ║
-║                                                              ║
-║  Lancement :                                                 ║
-║    python main.py                                            ║
-║                                                              ║
-║  Build Android (Buildozer) :                                 ║
-║    buildozer android debug                                   ║
-╚══════════════════════════════════════════════════════════════╝
-"""
-
-import json
-import random
-import asyncio
-import threading
-import unicodedata
-import uuid
-from typing import Optional
-
-import websockets
-from kivy.app import App
-from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen, SlideTransition
-from kivy.uix.popup import Popup
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.image import AsyncImage
-from kivy.properties import (
-    StringProperty, NumericProperty, BooleanProperty,
-    ListProperty, ObjectProperty
-)
-from kivy.clock import Clock, mainthread
-from kivy.factory import Factory
-from kivy.core.window import Window
-from kivy.animation import Animation
-from kivy.metrics import dp
-from kivy.utils import get_color_from_hex
-
-# Taille simulateur mobile
-Window.size = (390, 844)
-
-# ──────────────────────────────────────────────────────────────
-#  CONSTANTES
-# ──────────────────────────────────────────────────────────────
-
-# ← Changer selon ton hébergement
-SERVEUR_WS   = "wss://pays-game.onrender.com"
-SERVEUR_HTTP = "https://pays-game.onrender.com"
-
-COULEUR_FOND     = get_color_from_hex("#0d0f14")
-COULEUR_OCEAN    = get_color_from_hex("#0a1628")
-COULEUR_CARD     = get_color_from_hex("#112240")
-COULEUR_TEAL     = get_color_from_hex("#00c9a7")
-COULEUR_AMBER    = get_color_from_hex("#f4a947")
-COULEUR_CRIMSON  = get_color_from_hex("#e63946")
-COULEUR_GOLD     = get_color_from_hex("#d4a853")
-COULEUR_PAPIER   = get_color_from_hex("#f5f0e8")
-COULEUR_MUTED    = get_color_from_hex("#4a5568")
-
-# ──────────────────────────────────────────────────────────────
-#  UTILITAIRES
-# ──────────────────────────────────────────────────────────────
-
-def normaliser(s: str) -> str:
-    return unicodedata.normalize("NFD", s.upper()).encode("ascii", "ignore").decode("ascii")
-
-
-# ──────────────────────────────────────────────────────────────
-#  DÉCLARATION DES ÉCRANS
-# ──────────────────────────────────────────────────────────────
-
-class AccueilScreen(Screen):
-    pass
-
-class LobbyScreen(Screen):
-    pass
-
-class JeuScreen(Screen):
-    pass
-
-class FinScreen(Screen):
-    pass
-
-
-# ──────────────────────────────────────────────────────────────
-#  KV STRING
-# ──────────────────────────────────────────────────────────────
-
-KV = """
-#:import get_color_from_hex kivy.utils.get_color_from_hex
-#:import Factory kivy.factory.Factory
-#:import dp kivy.metrics.dp
-
-# ── Widgets réutilisables ───────────────────────────────────
-
-<BtnPrimary@Button>:
-    background_normal: ''
-    background_color: get_color_from_hex('#00c9a7')
-    color: get_color_from_hex('#0d0f14')
-    font_name: 'Roboto'
-    bold: True
-    size_hint_y: None
-    height: dp(52)
-    font_size: sp(13)
-
-<BtnSecondary@Button>:
-    background_normal: ''
-    background_color: (1,1,1,0.06)
-    color: get_color_from_hex('#f5f0e8')
-    font_name: 'Roboto'
-    size_hint_y: None
-    height: dp(52)
-    font_size: sp(13)
-    canvas.before:
-        Color:
-            rgba: 1,1,1,0.1
-        Line:
-            rounded_rectangle: self.x, self.y, self.width, self.height, dp(10)
-            width: 1
-
-<BtnDanger@Button>:
-    background_normal: ''
-    background_color: (0.9,0.22,0.27,0.15)
-    color: get_color_from_hex('#e63946')
-    font_name: 'Roboto'
-    size_hint_y: None
-    height: dp(48)
-    font_size: sp(12)
-    canvas.before:
-        Color:
-            rgba: 0.9,0.22,0.27,0.3
-        Line:
-            rounded_rectangle: self.x, self.y, self.width, self.height, dp(10)
-            width: 1
-
-<ChampsInput@TextInput>:
-    background_color: (1,1,1,0.06)
-    foreground_color: get_color_from_hex('#f5f0e8')
-    hint_text_color: get_color_from_hex('#4a5568')
-    cursor_color: get_color_from_hex('#00c9a7')
-    font_name: 'RobotoMono'
-    font_size: sp(15)
-    size_hint_y: None
-    height: dp(48)
-    padding: [dp(14), dp(12), dp(14), dp(12)]
-    multiline: False
-
-<LabelTitre@Label>:
-    font_name: 'Roboto'
-    bold: True
-    color: get_color_from_hex('#f5f0e8')
-
-<LabelMono@Label>:
-    font_name: 'RobotoMono'
-    color: get_color_from_hex('#4a5568')
-    font_size: sp(11)
-
-<ToucheClavier@Button>:
-    background_normal: ''
-    background_color: (1,1,1,0.06)
-    color: get_color_from_hex('#f5f0e8')
-    font_name: 'RobotoMono'
-    font_size: sp(13)
-    bold: True
-    canvas.before:
-        Color:
-            rgba: 1,1,1,0.08
-        Line:
-            rounded_rectangle: self.x+1, self.y+1, self.width-2, self.height-2, dp(6)
-            width: 1
-
-# ── GESTIONNAIRE D'ÉCRANS ───────────────────────────────────
-
-ScreenManager:
-    id: sm
-    transition: SlideTransition()
-    AccueilScreen:
-    LobbyScreen:
-    JeuScreen:
-    FinScreen:
-
-# ══════════════════════════════════════════════════════════════
-#  ÉCRAN 1 — ACCUEIL
-# ══════════════════════════════════════════════════════════════
-
-<AccueilScreen>:
-    name: 'accueil'
-    canvas.before:
-        Color:
-            rgba: get_color_from_hex('#0a1628')
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-    ScrollView:
-        BoxLayout:
-            orientation: 'vertical'
-            padding: dp(24)
-            spacing: dp(16)
-            size_hint_y: None
-            height: self.minimum_height
-
-            # Logo
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: dp(140)
-                spacing: dp(4)
-                padding: [0, dp(20), 0, 0]
-
-                Label:
-                    text: "🌍"
-                    font_size: sp(48)
-                    size_hint_y: None
-                    height: dp(60)
-
-                Label:
-                    text: "PAYS GAME"
-                    font_name: 'Roboto'
-                    bold: True
-                    font_size: sp(32)
-                    color: get_color_from_hex('#d4a853')
-                    size_hint_y: None
-                    height: dp(44)
-
-                Label:
-                    text: "LE JEU DES NATIONS"
-                    font_name: 'RobotoMono'
-                    font_size: sp(10)
-                    letter_spacing: dp(3)
-                    color: get_color_from_hex('#00c9a7')
-                    size_hint_y: None
-                    height: dp(20)
-
-            # Carte formulaire
-            BoxLayout:
-                orientation: 'vertical'
-                spacing: dp(12)
-                size_hint_y: None
-                height: self.minimum_height
-                canvas.before:
-                    Color:
-                        rgba: get_color_from_hex('#112240')
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(16)]
-                padding: dp(20)
-
-                LabelMono:
-                    text: "TON NOM"
-                    size_hint_y: None
-                    height: dp(20)
-                    color: get_color_from_hex('#00c9a7')
-
-                ChampsInput:
-                    id: input_nom
-                    hint_text: "Ex: Alice"
-
-                # Ligne langue + vies
-                GridLayout:
-                    cols: 2
-                    spacing: dp(10)
-                    size_hint_y: None
-                    height: dp(90)
-
-                    BoxLayout:
-                        orientation: 'vertical'
-                        spacing: dp(6)
-                        LabelMono:
-                            text: "LANGUE"
-                            color: get_color_from_hex('#00c9a7')
-                            size_hint_y: None
-                            height: dp(18)
-                        Spinner:
-                            id: spin_langue
-                            values: ['Français 🇫🇷', 'English 🇬🇧']
-                            text: 'Français 🇫🇷'
-                            background_normal: ''
-                            background_color: (1,1,1,0.06)
-                            color: get_color_from_hex('#f5f0e8')
-                            font_name: 'Roboto'
-                            size_hint_y: None
-                            height: dp(48)
-
-                    BoxLayout:
-                        orientation: 'vertical'
-                        spacing: dp(6)
-                        LabelMono:
-                            text: "VIES"
-                            color: get_color_from_hex('#00c9a7')
-                            size_hint_y: None
-                            height: dp(18)
-                        Spinner:
-                            id: spin_vies
-                            values: ['5 vies', '10 vies', '15 vies']
-                            text: '10 vies'
-                            background_normal: ''
-                            background_color: (1,1,1,0.06)
-                            color: get_color_from_hex('#f5f0e8')
-                            font_name: 'Roboto'
-                            size_hint_y: None
-                            height: dp(48)
-
-                # Ligne chrono + mode mixte
-                GridLayout:
-                    cols: 2
-                    spacing: dp(10)
-                    size_hint_y: None
-                    height: dp(90)
-
-                    BoxLayout:
-                        orientation: 'vertical'
-                        spacing: dp(6)
-                        LabelMono:
-                            text: "CHRONO"
-                            color: get_color_from_hex('#00c9a7')
-                            size_hint_y: None
-                            height: dp(18)
-                        Spinner:
-                            id: spin_temps
-                            values: ['10 sec', '15 sec', '30 sec', '60 sec']
-                            text: '15 sec'
-                            background_normal: ''
-                            background_color: (1,1,1,0.06)
-                            color: get_color_from_hex('#f5f0e8')
-                            font_name: 'Roboto'
-                            size_hint_y: None
-                            height: dp(48)
-
-                    BoxLayout:
-                        orientation: 'vertical'
-                        spacing: dp(6)
-                        LabelMono:
-                            text: "MODE MIXTE"
-                            color: get_color_from_hex('#00c9a7')
-                            size_hint_y: None
-                            height: dp(18)
-                        Switch:
-                            id: switch_mixte
-                            active: False
-                            size_hint_y: None
-                            height: dp(48)
-
-                BtnPrimary:
-                    text: "🗺️  CRÉER UNE PARTIE"
-                    on_release: app.creer_partie()
-
-                BoxLayout:
-                    size_hint_y: None
-                    height: dp(30)
-                    Label:
-                        text: "── ou rejoindre ──"
-                        color: get_color_from_hex('#4a5568')
-                        font_size: sp(12)
-
-                ChampsInput:
-                    id: input_room
-                    hint_text: "Code salle (ex: ABCDEF)"
-
-                BtnSecondary:
-                    text: "Rejoindre →"
-                    on_release: app.rejoindre_par_code()
-
-# ══════════════════════════════════════════════════════════════
-#  ÉCRAN 2 — LOBBY
-# ══════════════════════════════════════════════════════════════
-
-<LobbyScreen>:
-    name: 'lobby'
-    canvas.before:
-        Color:
-            rgba: get_color_from_hex('#0a1628')
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(24)
-        spacing: dp(16)
-
-        # En-tête
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(100)
-            spacing: dp(8)
-
-            LabelTitre:
-                text: "SALLE D'ATTENTE"
-                font_size: sp(22)
-                halign: 'center'
-
-            Label:
-                id: lbl_room_code
-                text: app.room_id
-                font_name: 'RobotoMono'
-                font_size: sp(28)
-                bold: True
-                color: get_color_from_hex('#d4a853')
-                halign: 'center'
-                letter_spacing: dp(6)
-
-            Label:
-                id: lbl_lien
-                text: "Appuyez pour copier le lien"
-                font_name: 'RobotoMono'
-                font_size: sp(10)
-                color: get_color_from_hex('#00c9a7')
-                halign: 'center'
-                on_touch_down: if self.collide_point(*args[1].pos): app.copier_lien()
-
-        # Liste joueurs
-        ScrollView:
-            GridLayout:
-                id: grid_joueurs
-                cols: 2
-                spacing: dp(10)
-                padding: [0, dp(4)]
-                size_hint_y: None
-                height: self.minimum_height
-
-        # Actions
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(180)
-            spacing: dp(10)
-
-            BtnSecondary:
-                text: "🤖  Ajouter un bot"
-                on_release: app.ajouter_ia()
-
-            BtnPrimary:
-                id: btn_demarrer
-                text: "▶  LANCER LA PARTIE"
-                on_release: app.demarrer_partie()
-
-# ══════════════════════════════════════════════════════════════
-#  ÉCRAN 3 — JEU
-# ══════════════════════════════════════════════════════════════
-
-<JeuScreen>:
-    name: 'jeu'
-    canvas.before:
-        Color:
-            rgba: get_color_from_hex('#0a1628')
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-    BoxLayout:
-        orientation: 'vertical'
-        spacing: 0
-
-        # Barre scores
-        BoxLayout:
-            id: scores_bar
-            size_hint_y: None
-            height: dp(72)
-            canvas.before:
-                Color:
-                    rgba: get_color_from_hex('#112240')
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-
-        # Barre chrono
-        BoxLayout:
-            size_hint_y: None
-            height: dp(4)
-            canvas.before:
-                Color:
-                    rgba: 1,1,1,0.06
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
-            Widget:
-                id: chrono_fill
-                size_hint_x: 1
-                canvas:
-                    Color:
-                        rgba: app.couleur_chrono
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
-
-        # Zone centrale
-        BoxLayout:
-            orientation: 'vertical'
-            padding: [dp(16), dp(12)]
-            spacing: dp(12)
-
-            # Séquence de lettres
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: dp(90)
-                spacing: dp(6)
-
-                Label:
-                    id: lbl_sequence
-                    text: app.lettres_en_cours if app.lettres_en_cours else "…"
-                    font_name: 'Roboto'
-                    bold: True
-                    font_size: sp(36)
-                    color: app.couleur_sequence
-                    halign: 'center'
-                    letter_spacing: dp(6)
-
-                Label:
-                    id: lbl_tour
-                    text: app.indicateur_tour
-                    font_name: 'RobotoMono'
-                    font_size: sp(11)
-                    color: get_color_from_hex('#00c9a7')
-                    halign: 'center'
-
-                Label:
-                    id: lbl_poss
-                    text: app.nb_possibilites
-                    font_name: 'RobotoMono'
-                    font_size: sp(10)
-                    color: get_color_from_hex('#4a5568')
-                    halign: 'center'
-
-            # Historique drapeaux
-            ScrollView:
-                size_hint_y: None
-                height: dp(60)
-                do_scroll_y: False
-                GridLayout:
-                    id: historique_drapeaux
-                    rows: 1
-                    spacing: dp(8)
-                    padding: [dp(4), 0]
-                    size_hint_x: None
-                    width: self.minimum_width
-
-            # Clavier
-            GridLayout:
-                id: clavier_grille
-                cols: 7
-                spacing: dp(4)
-                size_hint_y: None
-                height: dp(200)
-
-            # Bouton langue au chat
-            BtnDanger:
-                id: btn_langue
-                text: "🗣  DONNER MA LANGUE AU CHAT"
-                on_release: app.demander_langue_au_chat()
-
-# ══════════════════════════════════════════════════════════════
-#  ÉCRAN 4 — FIN
-# ══════════════════════════════════════════════════════════════
-
-<FinScreen>:
-    name: 'fin'
-    canvas.before:
-        Color:
-            rgba: get_color_from_hex('#0a1628')
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(32)
-        spacing: dp(24)
-        halign: 'center'
-
-        Label:
-            text: "👑"
-            font_size: sp(64)
-            size_hint_y: None
-            height: dp(80)
-
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(80)
-            Label:
-                text: "VAINQUEUR"
-                font_name: 'RobotoMono'
-                font_size: sp(11)
-                color: get_color_from_hex('#00c9a7')
-                letter_spacing: dp(3)
-            Label:
-                id: lbl_gagnant
-                text: app.nom_gagnant
-                font_name: 'Roboto'
-                bold: True
-                font_size: sp(32)
-                color: get_color_from_hex('#d4a853')
-
-        # Stats
-        GridLayout:
-            cols: 3
-            spacing: dp(10)
-            size_hint_y: None
-            height: dp(90)
-
-            BoxLayout:
-                orientation: 'vertical'
-                canvas.before:
-                    Color:
-                        rgba: 1,1,1,0.04
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(10)]
-                Label:
-                    id: stat_pays
-                    text: "0"
-                    font_name: 'Roboto'
-                    bold: True
-                    font_size: sp(28)
-                    color: get_color_from_hex('#00c9a7')
-                Label:
-                    text: "PAYS"
-                    font_name: 'RobotoMono'
-                    font_size: sp(9)
-                    color: get_color_from_hex('#4a5568')
-
-            BoxLayout:
-                orientation: 'vertical'
-                canvas.before:
-                    Color:
-                        rgba: 1,1,1,0.04
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(10)]
-                Label:
-                    id: stat_tours
-                    text: "0"
-                    font_name: 'Roboto'
-                    bold: True
-                    font_size: sp(28)
-                    color: get_color_from_hex('#00c9a7')
-                Label:
-                    text: "TOURS"
-                    font_name: 'RobotoMono'
-                    font_size: sp(9)
-                    color: get_color_from_hex('#4a5568')
-
-            BoxLayout:
-                orientation: 'vertical'
-                canvas.before:
-                    Color:
-                        rgba: 1,1,1,0.04
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: self.size
-                        radius: [dp(10)]
-                Label:
-                    id: stat_vies
-                    text: "0"
-                    font_name: 'Roboto'
-                    bold: True
-                    font_size: sp(28)
-                    color: get_color_from_hex('#00c9a7')
-                Label:
-                    text: "VIES"
-                    font_name: 'RobotoMono'
-                    font_size: sp(9)
-                    color: get_color_from_hex('#4a5568')
-
-        Widget:
-
-        BtnSecondary:
-            text: "← Accueil"
-            on_release: app.retour_accueil()
-
-        BtnPrimary:
-            text: "↺  Rejouer"
-            on_release: app.rejouer()
-"""
-
-
-# ──────────────────────────────────────────────────────────────
-#  APPLICATION PRINCIPALE
-# ──────────────────────────────────────────────────────────────
-
-class PaysGameApp(App):
-
-    # ── Properties (liées au KV) ───────────────────────────────
-    room_id           = StringProperty("——")
-    lettres_en_cours  = StringProperty("")
-    indicateur_tour   = StringProperty("En attente…")
-    nb_possibilites   = StringProperty("")
-    nom_gagnant       = StringProperty("—")
-    couleur_sequence  = ListProperty([0.96, 0.94, 0.91, 1])   # papier
-    couleur_chrono    = ListProperty([0, 0.79, 0.66, 1])        # teal
-
-    # ── État interne ───────────────────────────────────────────
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.joueur_id     = str(uuid.uuid4())
-        self.nom_joueur    = "Joueur"
-        self.langue        = "fr"
-        self.mode_mixte    = False
-        self.temps_max     = 15
-        self.vies_depart   = 10
-        self.est_createur  = False
-        self.mode_connecte = False
-
-        self.ws            = None          # WebSocket actif
-        self.ws_loop       = None          # event loop asyncio dédié
-        self.ws_thread     = None
-
-        self.pays_local    = []
-        self.pays_joues    = set()
-        self.pays_joues_liste = []
-
-        # État solo
-        self.joueurs_solo  = []
-        self.index_tour    = 0
-        self.sequence      = ""
-        self.est_mon_tour  = False
-        self.joueur_fautif = None
-        self.nb_tours      = 0
-
-        self._chrono_event = None
-        self._temps_restant = 15
-
-    # ──────────────────────────────────────────────────────────
-    #  BUILD
-    # ──────────────────────────────────────────────────────────
-
-    def build(self):
-        self.root = Builder.load_string(KV)
-        return self.root
-
-    def on_start(self):
-        self._charger_pays_local("fr")
-        self._lancer_loop_asyncio()
-
-    # ──────────────────────────────────────────────────────────
-    #  LOOP ASYNCIO (thread dédié pour WebSockets)
-    # ──────────────────────────────────────────────────────────
-
-    def _lancer_loop_asyncio(self):
-        self.ws_loop = asyncio.new_event_loop()
-        self.ws_thread = threading.Thread(
-            target=self.ws_loop.run_forever,
-            daemon=True
-        )
-        self.ws_thread.start()
-
-    def _run_async(self, coro):
-        """Lance une coroutine dans la loop dédiée."""
-        asyncio.run_coroutine_threadsafe(coro, self.ws_loop)
-
-    # ──────────────────────────────────────────────────────────
-    #  DONNÉES PAYS
-    # ──────────────────────────────────────────────────────────
-
-    def _charger_pays_local(self, langue: str):
-        try:
-            with open(f"pays_{langue}.json", "r", encoding="utf-8") as f:
-                self.pays_local = json.load(f)
-        except FileNotFoundError:
-            self.pays_local = [
-                {"nom": "FRANCE", "capitale": "PARIS", "code": "fr",
-                 "nom_normalise": "FRANCE", "capitale_normalisee": "PARIS"},
-                {"nom": "ALLEMAGNE", "capitale": "BERLIN", "code": "de",
-                 "nom_normalise": "ALLEMAGNE", "capitale_normalisee": "BERLIN"},
-                {"nom": "ESPAGNE", "capitale": "MADRID", "code": "es",
-                 "nom_normalise": "ESPAGNE", "capitale_normalisee": "MADRID"},
-                {"nom": "ITALIE", "capitale": "ROME", "code": "it",
-                 "nom_normalise": "ITALIE", "capitale_normalisee": "ROME"},
-                {"nom": "CANADA", "capitale": "OTTAWA", "code": "ca",
-                 "nom_normalise": "CANADA", "capitale_normalisee": "OTTAWA"},
-                {"nom": "CHINE", "capitale": "PEKIN", "code": "cn",
-                 "nom_normalise": "CHINE", "capitale_normalisee": "PEKIN"},
-                {"nom": "JAPON", "capitale": "TOKYO", "code": "jp",
-                 "nom_normalise": "JAPON", "capitale_normalisee": "TOKYO"},
-                {"nom": "BELGIQUE", "capitale": "BRUXELLES", "code": "be",
-                 "nom_normalise": "BELGIQUE", "capitale_normalisee": "BRUXELLES"},
-            ]
-            self._toast("⚠️ Fichier pays non trouvé — mode démo")
-
-    def _chercher_possibilites(self, seq: str):
-        if not seq:
-            return self.pays_local
-        s = normaliser(seq)
-        return [
-            p for p in self.pays_local
-            if p["nom_normalise"].startswith(s)
-            or (self.mode_mixte and p.get("capitale_normalisee", "").startswith(s))
-        ]
-
-    def _est_complet(self, seq: str):
-        s = normaliser(seq)
-        for p in self.pays_local:
-            if p["nom_normalise"] == s:
-                return p
-            if self.mode_mixte and p.get("capitale_normalisee") == s:
-                return p
-        return None
-
-    # ──────────────────────────────────────────────────────────
-    #  ACCUEIL
-    # ──────────────────────────────────────────────────────────
-
-    def _lire_config(self):
-        ecran = self.root.get_screen("accueil")
-        self.nom_joueur = ecran.ids.input_nom.text.strip() or "Joueur"
-        self.langue     = "fr" if "Français" in ecran.ids.spin_langue.text else "en"
-        self.mode_mixte = ecran.ids.switch_mixte.active
-        self.temps_max  = int(ecran.ids.spin_temps.text.split()[0])
-        self.vies_depart = int(ecran.ids.spin_vies.text.split()[0])
-        self._charger_pays_local(self.langue)
-
-    def creer_partie(self):
-        self._lire_config()
-        self.est_createur = True
-        self._run_async(self._tenter_connexion_serveur(creer=True))
-
-    def rejoindre_par_code(self):
-        self._lire_config()
-        ecran = self.root.get_screen("accueil")
-        code = ecran.ids.input_room.text.strip().upper()
-        if len(code) != 6:
-            self._toast("Code invalide (6 lettres)", "error")
-            return
-        self.est_createur = False
-        self.room_id = code
-        self._run_async(self._tenter_connexion_serveur(creer=False))
-
-    # ──────────────────────────────────────────────────────────
-    #  WEBSOCKET
-    # ──────────────────────────────────────────────────────────
-
-    async def _tenter_connexion_serveur(self, creer: bool):
-        try:
-            if creer:
-                import urllib.request
-                config = {
-                    "langue": self.langue,
-                    "mode_mixte": self.mode_mixte,
-                    "vies": self.vies_depart,
-                    "temps": self.temps_max,
-                    "max_joueurs": 8,
-                }
-                req = urllib.request.Request(
-                    f"{SERVEUR_HTTP}/parties",
-                    data=json.dumps(config).encode(),
-                    headers={"Content-Type": "application/json"},
-                    method="POST"
-                )
-                with urllib.request.urlopen(req, timeout=4) as resp:
-                    data = json.loads(resp.read())
-                self.room_id = data["room_id"]
-
-            uri = f"{SERVEUR_WS}/ws/{self.room_id}/{self.joueur_id}/{self.nom_joueur}"
-            async with websockets.connect(uri, ping_interval=20) as ws:
-                self.ws = ws
-                self.mode_connecte = True
-                Clock.schedule_once(lambda dt: self._afficher_lobby(), 0)
-                await self._recevoir_messages(ws)
-
-        except Exception as e:
-            self.ws = None
-            self.mode_connecte = False
-            Clock.schedule_once(lambda dt: self._lancer_mode_solo(), 0)
-
-    async def _recevoir_messages(self, ws):
-        try:
-            async for raw in ws:
-                msg = json.loads(raw)
-                Clock.schedule_once(lambda dt, m=msg: self._traiter_message(m), 0)
-        except websockets.ConnectionClosed:
-            Clock.schedule_once(lambda dt: self._toast("🔌 Déconnecté", "error"), 0)
-
-    def _envoyer_ws(self, data: dict):
-        if self.ws and self.mode_connecte:
-            self._run_async(self.ws.send(json.dumps(data)))
-
-    # ──────────────────────────────────────────────────────────
-    #  TRAITEMENT MESSAGES SERVEUR
-    # ──────────────────────────────────────────────────────────
-
-    def _traiter_message(self, msg: dict):
-        t = msg.get("type", "")
-
-        if t in ("etat", "joueur_rejoint", "joueur_parti"):
-            self._sync_etat(msg)
-
-        elif t == "partie_demarree":
-            self._sync_etat(msg)
-            self._aller_ecran("jeu")
-            self._toast("🎮 La partie commence !")
-
-        elif t == "nouveau_tour":
-            self._sync_etat(msg)
-            self._lancer_chrono(msg.get("config", {}).get("temps", self.temps_max))
-            self.nb_tours += 1
-
-        elif t == "sequence_invalide":
-            self._sync_etat(msg)
-            self._flash_sequence(invalide=True)
-            self._toast(msg.get("message", ""), "warn")
-
-        elif t == "mot_complet":
-            self._sync_etat(msg)
-            self._flash_sequence(complet=True)
-            self._ajouter_drapeau(msg.get("pays", {}))
-            self._toast(msg.get("message", ""), "warn")
-
-        elif t == "langue_au_chat":
-            self._sync_etat(msg)
-            if msg.get("interpelle") == self.joueur_id:
-                Clock.schedule_once(
-                    lambda dt: self._ouvrir_modal_langue(msg.get("message", "")), 0
-                )
-            else:
-                self._toast(msg.get("message", ""), "warn")
-
-        elif t == "verdict_langue_au_chat":
-            self._afficher_verdict(msg)
-
-        elif t == "perte_vie":
-            self._sync_etat(msg)
-            self._toast(msg.get("message", ""), "error" if msg.get("elimine") else "warn")
-
-        elif t == "fin_partie":
-            self._sync_etat(msg)
-            self._afficher_fin(msg)
-
-        elif t == "chat":
-            self._ajouter_chat(msg)
-
-    def _sync_etat(self, msg: dict):
-        """Met à jour l'UI depuis un snapshot serveur."""
-        seq = msg.get("sequence", "")
-        self.lettres_en_cours = (" · ".join(seq)) if seq else ""
-
-        actuel = msg.get("joueur_actuel")
-        self.est_mon_tour = actuel == self.joueur_id
-
-        joueurs = msg.get("joueurs", [])
-        nom_actuel = next((j["nom"] for j in joueurs if j["id"] == actuel), "")
-        self.indicateur_tour = "⬇ Ton tour !" if self.est_mon_tour else f"Tour de {nom_actuel}"
-
-        if seq:
-            poss = self._chercher_possibilites(seq)
-            self.nb_possibilites = f"{len(poss)} pays possible{'s' if len(poss) > 1 else ''}" if poss else ""
-        else:
-            self.nb_possibilites = ""
-
-        self._mettre_a_jour_scores(msg)
-        self._activer_clavier(self.est_mon_tour)
-
-    # ──────────────────────────────────────────────────────────
-    #  LOBBY
-    # ──────────────────────────────────────────────────────────
-
-    def _afficher_lobby(self):
-        self._aller_ecran("lobby")
-        ecran = self.root.get_screen("lobby")
-        ecran.ids.lbl_room_code.text = self.room_id
-        ecran.ids.btn_demarrer.disabled = not self.est_createur
-
-    def copier_lien(self):
-        from kivy.core.clipboard import Clipboard
-        lien = f"pays-game://rejoindre/{self.room_id}"
-        Clipboard.copy(lien)
-        self._toast("🔗 Lien copié !")
-
-    def _mettre_a_jour_grille_joueurs(self, joueurs: list):
-        try:
-            grid = self.root.get_screen("lobby").ids.grid_joueurs
-        except Exception:
-            return
-        grid.clear_widgets()
-        avatars = ['🧑', '👩', '🧔', '👱', '🧕', '👨‍💻', '🧙', '🦊']
-        for i, j in enumerate(joueurs):
-            card = BoxLayout(orientation='vertical', padding=dp(12), spacing=dp(4),
-                             size_hint_y=None, height=dp(80))
-            with card.canvas.before:
-                from kivy.graphics import Color, RoundedRectangle
-                Color(rgba=(1, 1, 1, 0.04))
-                self._rr = RoundedRectangle(pos=card.pos, size=card.size, radius=[dp(10)])
-            card.add_widget(Label(
-                text=f"{'🤖' if j.get('est_ia') else avatars[i % len(avatars)]}",
-                font_size='24sp'
-            ))
-            card.add_widget(Label(
-                text=j['nom'], font_name='Roboto', font_size='13sp',
-                color=COULEUR_PAPIER, bold=True
-            ))
-            tag = 'BOT' if j.get('est_ia') else ('MOI' if j['id'] == self.joueur_id else 'EN LIGNE')
-            card.add_widget(Label(
-                text=tag, font_name='RobotoMono', font_size='10sp',
-                color=COULEUR_TEAL
-            ))
-            grid.add_widget(card)
-
-    def ajouter_ia(self):
-        if self.mode_connecte:
-            import urllib.request
-            try:
-                req = urllib.request.Request(
-                    f"{SERVEUR_HTTP}/parties/{self.room_id}/ia",
-                    method="POST"
-                )
-                urllib.request.urlopen(req, timeout=3)
-            except Exception:
-                self._toast("Serveur indisponible", "error")
-        else:
-            self._ajouter_ia_locale()
-
-    def demarrer_partie(self):
-        if self.mode_connecte:
-            import urllib.request
-            try:
-                req = urllib.request.Request(
-                    f"{SERVEUR_HTTP}/parties/{self.room_id}/demarrer?joueur_id={self.joueur_id}",
-                    method="POST"
-                )
-                urllib.request.urlopen(req, timeout=3)
-            except Exception:
-                self._toast("Erreur serveur", "error")
-        else:
-            self._demarrer_solo()
-
-    # ──────────────────────────────────────────────────────────
-    #  CLAVIER
-    # ──────────────────────────────────────────────────────────
-
-    def _construire_clavier(self):
-        try:
-            grille = self.root.get_screen("jeu").ids.clavier_grille
-        except Exception:
-            return
-        grille.clear_widgets()
-        for lettre in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-            btn = Factory.ToucHEClavier(text=lettre)
-            btn.bind(on_release=lambda inst, l=lettre: self._appuyer_touche(l))
-            grille.add_widget(btn)
-
-    def _activer_clavier(self, actif: bool):
-        try:
-            grille = self.root.get_screen("jeu").ids.clavier_grille
-            btn_langue = self.root.get_screen("jeu").ids.btn_langue
-        except Exception:
-            return
-        for child in grille.children:
-            child.disabled = not actif
-        btn_langue.disabled = actif  # langue au chat = quand c'est PAS mon tour
-
-    def _appuyer_touche(self, lettre: str):
-        if not self.est_mon_tour:
-            return
-        if self.mode_connecte:
-            self._envoyer_ws({"action": "lettre", "lettre": lettre})
-        else:
-            self._traiter_lettre_solo(lettre)
-
-    # ──────────────────────────────────────────────────────────
-    #  CHRONO
-    # ──────────────────────────────────────────────────────────
-
-    def _lancer_chrono(self, secondes: int):
-        if self._chrono_event:
-            self._chrono_event.cancel()
-        self._temps_restant = secondes
-        self.temps_max = secondes
-        self._tick_chrono(0)
-        self._chrono_event = Clock.schedule_interval(self._tick_chrono, 1)
-
-    def _tick_chrono(self, dt):
-        try:
-            fill = self.root.get_screen("jeu").ids.chrono_fill
-        except Exception:
-            return
-        pct = self._temps_restant / max(self.temps_max, 1)
-        fill.width = fill.parent.width * pct
-
-        if self._temps_restant <= 5:
-            self.couleur_chrono = [0.9, 0.22, 0.27, 1]  # crimson
-        else:
-            self.couleur_chrono = [0, 0.79, 0.66, 1]  # teal
-
-        self._temps_restant -= 1
-        if self._temps_restant < 0:
-            if self._chrono_event:
-                self._chrono_event.cancel()
-            if not self.mode_connecte and self.est_mon_tour:
-                self._perdre_vie_solo(self.joueur_id, "⏰ Temps écoulé !")
-
-    # ──────────────────────────────────────────────────────────
-    #  SCORES
-    # ──────────────────────────────────────────────────────────
-
-    def _mettre_a_jour_scores(self, msg: dict):
-        try:
-            bar = self.root.get_screen("jeu").ids.scores_bar
-        except Exception:
-            return
-        bar.clear_widgets()
-        joueurs = msg.get("joueurs", [])
-        actuel  = msg.get("joueur_actuel")
-        vies_max = msg.get("config", {}).get("vies", self.vies_depart)
-
-        for i, j in enumerate(joueurs):
-            actif = j["id"] == actuel
-            col = BoxLayout(orientation='vertical', padding=[dp(10), dp(8)], spacing=dp(4))
-
-            # Fond actif
-            if actif:
-                with col.canvas.before:
-                    from kivy.graphics import Color, Rectangle
-                    Color(rgba=(0, 0.79, 0.66, 0.08))
-                    Rectangle(pos=col.pos, size=col.size)
-
-            col.add_widget(Label(
-                text=f"{'🤖' if j.get('est_ia') else ''}{j['nom']}",
-                font_name='RobotoMono',
-                font_size='10sp',
-                color=COULEUR_TEAL if actif else (*COULEUR_MUTED[:3], 0.7),
-                bold=actif,
-                halign='center',
-                size_hint_y=None,
-                height=dp(18)
-            ))
-
-            # Points de vie
-            dots_layout = BoxLayout(size_hint_y=None, height=dp(12), spacing=dp(3))
-            dots_layout.bind(minimum_width=dots_layout.setter('width'))
-            for k in range(vies_max):
-                from kivy.uix.widget import Widget
-                from kivy.graphics import Color, Ellipse
-                dot = Widget(size_hint=(None, None), size=(dp(8), dp(8)))
-                with dot.canvas:
-                    Color(rgba=COULEUR_CRIMSON if k < j["vies"] else (1, 1, 1, 0.1))
-                    Ellipse(pos=dot.pos, size=dot.size)
-                dots_layout.add_widget(dot)
-
-            col.add_widget(dots_layout)
-            bar.add_widget(col)
-
-            if i < len(joueurs) - 1:
-                bar.add_widget(Label(
-                    text="VS", font_name='RobotoMono', font_size='10sp',
-                    color=COULEUR_MUTED, size_hint_x=None, width=dp(30)
-                ))
-
-    # ──────────────────────────────────────────────────────────
-    #  DRAPEAUX
-    # ──────────────────────────────────────────────────────────
-
-    def _ajouter_drapeau(self, pays: dict):
-        if not pays:
-            return
-        try:
-            histo = self.root.get_screen("jeu").ids.historique_drapeaux
-        except Exception:
-            return
-
-        col = BoxLayout(orientation='vertical', size_hint=(None, 1), width=dp(56),
-                        spacing=dp(2), padding=[0, dp(2)])
-        col.add_widget(AsyncImage(
-            source=f"https://flagcdn.com/w80/{pays.get('code','fr')}.png",
-            size_hint=(1, None),
-            height=dp(36),
-            allow_stretch=True,
-            keep_ratio=True
-        ))
-        col.add_widget(Label(
-            text=pays.get('nom', '')[:8],
-            font_name='RobotoMono',
-            font_size='7sp',
-            color=COULEUR_MUTED,
-            halign='center'
-        ))
-        histo.add_widget(col)
-
-    # ──────────────────────────────────────────────────────────
-    #  LANGUE AU CHAT
-    # ──────────────────────────────────────────────────────────
-
-    def demander_langue_au_chat(self):
-        if self.mode_connecte:
-            self._envoyer_ws({"action": "langue_au_chat"})
-        else:
-            self._demander_langue_locale()
-
-    def _ouvrir_modal_langue(self, texte: str = ""):
-        content = BoxLayout(orientation='vertical', padding=dp(20), spacing=dp(14))
-        content.add_widget(Label(
-            text="🗣️", font_size='40sp', size_hint_y=None, height=dp(52)
-        ))
-        content.add_widget(Label(
-            text="Langue au chat !",
-            font_name='Roboto', bold=True, font_size='18sp',
-            color=COULEUR_PAPIER, size_hint_y=None, height=dp(28)
-        ))
-        content.add_widget(Label(
-            text=texte or "Quel pays avais-tu en tête ?",
-            font_name='Roboto', font_size='13sp',
-            color=(*COULEUR_PAPIER[:3], 0.7),
-            size_hint_y=None, height=dp(48),
-            text_size=(dp(280), None), halign='center'
-        ))
-        saisie = TextInput(
-            hint_text="FRANCE…",
-            font_name='RobotoMono',
-            font_size='18sp',
-            halign='center',
-            background_color=(1, 1, 1, 0.06),
-            foreground_color=COULEUR_PAPIER,
-            size_hint_y=None, height=dp(52),
-            multiline=False
-        )
-        content.add_widget(saisie)
-
-        popup = Popup(
-            title="",
-            content=content,
-            size_hint=(0.9, None),
-            height=dp(340),
-            background_color=(*COULEUR_CARD[:3], 0.98),
-            separator_height=0,
-        )
-
-        btn_valider = Button(
-            text="Valider",
-            background_normal='',
-            background_color=COULEUR_TEAL,
-            color=COULEUR_FOND,
-            font_name='Roboto', bold=True,
-            size_hint_y=None, height=dp(48)
-        )
-
-        def valider(instance):
-            rep = saisie.text.strip()
-            popup.dismiss()
-            if self.mode_connecte:
-                self._envoyer_ws({"action": "reponse_langue_au_chat", "pays": rep})
-            else:
-                self._evaluer_reponse_locale(rep)
-
-        btn_valider.bind(on_release=valider)
-        saisie.bind(on_text_validate=valider)
-        content.add_widget(btn_valider)
-        popup.open()
-        Clock.schedule_once(lambda dt: saisie.focus.__set__(saisie, True), 0.1)
-
-    def _afficher_verdict(self, msg: dict):
-        valide = msg.get("valide", False)
-        content = BoxLayout(orientation='vertical', padding=dp(20), spacing=dp(12))
-        content.add_widget(Label(
-            text="✅" if valide else "❌",
-            font_size='40sp', size_hint_y=None, height=dp(52)
-        ))
-        content.add_widget(Label(
-            text="Bravo !" if valide else "Perdu !",
-            font_name='Roboto', bold=True, font_size='18sp',
-            color=COULEUR_TEAL if valide else COULEUR_CRIMSON,
-            size_hint_y=None, height=dp(28)
-        ))
-        content.add_widget(Label(
-            text=msg.get("message", ""),
-            font_name='Roboto', font_size='13sp',
-            color=(*COULEUR_PAPIER[:3], 0.8),
-            size_hint_y=None, height=dp(60),
-            text_size=(dp(280), None), halign='center'
-        ))
-        popup = Popup(
-            title="", content=content,
-            size_hint=(0.85, None), height=dp(250),
-            background_color=(*COULEUR_CARD[:3], 0.98),
-            separator_height=0,
-            auto_dismiss=True
-        )
-        btn = Button(
-            text="OK",
-            background_normal='', background_color=COULEUR_TEAL,
-            color=COULEUR_FOND, font_name='Roboto', bold=True,
-            size_hint_y=None, height=dp(46)
-        )
-        btn.bind(on_release=lambda x: popup.dismiss())
-        content.add_widget(btn)
-        popup.open()
-
-    # ──────────────────────────────────────────────────────────
-    #  TOASTS
-    # ──────────────────────────────────────────────────────────
-
-    def _toast(self, texte: str, niveau: str = ""):
-        couleurs = {
-            "error": COULEUR_CRIMSON,
-            "warn":  COULEUR_AMBER,
-            "":      COULEUR_TEAL,
-        }
-        couleur = couleurs.get(niveau, COULEUR_TEAL)
-
-        content = BoxLayout(padding=[dp(14), dp(10)])
-        content.add_widget(Label(
-            text=texte,
-            font_name='Roboto',
-            font_size='13sp',
-            color=COULEUR_PAPIER,
-            text_size=(Window.width * 0.75, None),
-            halign='center'
-        ))
-        popup = Popup(
-            title="", content=content,
-            size_hint=(0.85, None), height=dp(64),
-            background_color=(0.07, 0.09, 0.12, 0.95),
-            separator_height=0,
-            auto_dismiss=True
-        )
-        with popup.canvas.before:
-            from kivy.graphics import Color, Line
-            Color(rgba=couleur)
-            Line(rectangle=(popup.x, popup.y, popup.width, popup.height), width=1.5)
-
-        popup.open()
-        Clock.schedule_once(lambda dt: popup.dismiss(), 3.0)
-
-    # ──────────────────────────────────────────────────────────
-    #  ANIMATIONS
-    # ──────────────────────────────────────────────────────────
-
-    def _flash_sequence(self, invalide=False, complet=False):
-        if invalide:
-            self.couleur_sequence = [*COULEUR_CRIMSON[:3], 1]
-        elif complet:
-            self.couleur_sequence = [*COULEUR_TEAL[:3], 1]
-        Clock.schedule_once(
-            lambda dt: setattr(self, 'couleur_sequence', [0.96, 0.94, 0.91, 1]), 0.6
-        )
-
-    # ──────────────────────────────────────────────────────────
-    #  MODE SOLO — IA LOCALE
-    # ──────────────────────────────────────────────────────────
-
-    def _lancer_mode_solo(self):
-        self.mode_connecte = False
-        self.joueurs_solo = [
-            {"id": self.joueur_id, "nom": self.nom_joueur,
-             "vies": self.vies_depart, "en_vie": True, "est_ia": False},
-            {"id": "ia", "nom": "🤖 Ordinateur",
-             "vies": self.vies_depart, "en_vie": True, "est_ia": True},
-        ]
-        self.index_tour   = 0
-        self.sequence     = ""
-        self.pays_joues   = set()
-        self.pays_joues_liste = []
-        self.nb_tours     = 0
-        self.joueur_fautif = None
-
-        self.room_id = "SOLO"
-        self._afficher_lobby()
-        ecran = self.root.get_screen("lobby")
-        ecran.ids.btn_demarrer.disabled = False
-        self._mettre_a_jour_grille_joueurs(self.joueurs_solo)
-        self._toast("🔌 Serveur non disponible — mode solo vs IA", "warn")
-
-    def _ajouter_ia_locale(self):
-        if len(self.joueurs_solo) >= 4:
-            return
-        self.joueurs_solo.append({
-            "id": f"ia{len(self.joueurs_solo)}",
-            "nom": "🤖 Bot",
-            "vies": self.vies_depart,
-            "en_vie": True,
-            "est_ia": True,
-        })
-        self._mettre_a_jour_grille_joueurs(self.joueurs_solo)
-
-    def _demarrer_solo(self):
-        self._aller_ecran("jeu")
-        self._construire_clavier()
-        self._nouveau_tour_solo()
-
-    def _joueur_actuel_solo(self):
-        return self.joueurs_solo[self.index_tour]
-
-    def _nouveau_tour_solo(self):
-        self.sequence = ""
-        self.joueur_fautif = None
-        self.nb_tours += 1
-        j = self._joueur_actuel_solo()
-        self.est_mon_tour = j["id"] == self.joueur_id
-
-        snap = {
-            "sequence": "",
-            "joueur_actuel": j["id"],
-            "joueurs": self.joueurs_solo,
-            "config": {"vies": self.vies_depart},
-        }
-        self._sync_etat(snap)
-        self._lancer_chrono(self.temps_max)
-
-        if j["est_ia"]:
-            self._activer_clavier(False)
-            Clock.schedule_once(lambda dt: self._ia_jouer_solo(), random.uniform(1.0, 2.2))
-
-    def _traiter_lettre_solo(self, lettre: str):
-        if not self.est_mon_tour:
-            return
-        nouvelle_seq = self.sequence + normaliser(lettre)
-        possibilites = self._chercher_possibilites(nouvelle_seq)
-
-        if not possibilites:
-            self._flash_sequence(invalide=True)
-            self.sequence = nouvelle_seq
-            self.joueur_fautif = self.joueur_id
-            snap = {"sequence": nouvelle_seq, "joueur_actuel": self.joueur_id,
-                    "joueurs": self.joueurs_solo, "config": {"vies": self.vies_depart}}
-            self._sync_etat(snap)
-            self._toast("⚠️ Séquence invalide — l'IA peut demander langue au chat", "warn")
-            self._passer_suivant_solo()
-            return
-
-        self.sequence = nouvelle_seq
-        match = self._est_complet(nouvelle_seq)
-
-        if match:
-            if match["nom_normalise"] in self.pays_joues:
-                self._toast(f"🔁 {match['nom']} déjà joué ! Tu perds une vie.", "error")
-                self._perdre_vie_solo(self.joueur_id, "Pays déjà joué")
-                return
-
-            self.pays_joues.add(match["nom_normalise"])
-            self.pays_joues_liste.append(match)
-            self._ajouter_drapeau(match)
-            self._flash_sequence(complet=True)
-            self._toast(f"💀 Tu as complété {match['nom']} — tu perds une vie !", "warn")
-            Clock.schedule_once(lambda dt: self._perdre_vie_solo(self.joueur_id, "Mot complet"), 1.5)
-        else:
-            snap = {"sequence": nouvelle_seq, "joueur_actuel": self.joueur_id,
-                    "joueurs": self.joueurs_solo, "config": {"vies": self.vies_depart}}
-            self._sync_etat(snap)
-            self._passer_suivant_solo()
-
-    def _ia_jouer_solo(self):
-        seq = self.sequence
-        possibilites = self._chercher_possibilites(seq)
-
-        if not possibilites:
-            # L'IA interpelle le joueur si c'est lui le fautif
-            if self.joueur_fautif == self.joueur_id:
-                Clock.schedule_once(
-                    lambda dt: self._ouvrir_modal_langue("L'IA te demande : quel pays visais-tu ?"), 0
-                )
-            else:
-                self._toast("🤖 L'IA donne sa langue au chat ! Elle perd une vie.", "warn")
-                self._perdre_vie_solo("ia", "IA piégée")
-            return
-
-        # Stratégie : évite de compléter si possible
-        cibles = [p for p in possibilites if len(p["nom_normalise"]) > len(seq) + 1]
-        if not cibles:
-            cibles = possibilites
-
-        cible = random.choice(cibles)
-        lettre_suivante = cible["nom_normalise"][len(seq)]
-        nouvelle_seq = seq + lettre_suivante
-        self.sequence = nouvelle_seq
-        self.joueur_fautif = "ia"
-
-        match = self._est_complet(nouvelle_seq)
-        if match:
-            if match["nom_normalise"] in self.pays_joues:
-                self._toast(f"🔁 L'IA a joué {match['nom']} déjà joué ! Elle perd une vie.", "warn")
-                Clock.schedule_once(lambda dt: self._perdre_vie_solo("ia", "Pays déjà joué"), 0.5)
-                return
-            self.pays_joues.add(match["nom_normalise"])
-            self.pays_joues_liste.append(match)
-            self._ajouter_drapeau(match)
-            snap = {"sequence": nouvelle_seq, "joueur_actuel": "ia",
-                    "joueurs": self.joueurs_solo, "config": {"vies": self.vies_depart}}
-            self._sync_etat(snap)
-            self._flash_sequence(complet=True)
-            self._toast(f"💀 L'IA a complété {match['nom']} — elle perd une vie !", "warn")
-            Clock.schedule_once(lambda dt: self._perdre_vie_solo("ia", "Mot complet"), 1.5)
-        else:
-            snap = {"sequence": nouvelle_seq, "joueur_actuel": "ia",
-                    "joueurs": self.joueurs_solo, "config": {"vies": self.vies_depart}}
-            self._sync_etat(snap)
-            self._passer_suivant_solo()
-
-    def _demander_langue_locale(self):
-        """Le joueur demande une langue au chat à l'IA."""
-        seq = self.sequence
-        possibilites = self._chercher_possibilites(seq)
-        if possibilites:
-            pays = random.choice(possibilites)
-            self._afficher_verdict({
-                "valide": True,
-                "message": f"L'IA répond : « {pays['nom']} ». Valide ! Tu perds une vie."
-            })
-            self.pays_joues.add(pays["nom_normalise"])
-            self.pays_joues_liste.append(pays)
-            self._ajouter_drapeau(pays)
-            Clock.schedule_once(lambda dt: self._perdre_vie_solo(self.joueur_id, "Langue au chat perdue"), 0.5)
-        else:
-            self._afficher_verdict({"valide": False, "message": "L'IA ne trouve rien ! Elle perd une vie."})
-            Clock.schedule_once(lambda dt: self._perdre_vie_solo("ia", "IA sans réponse"), 0.5)
-
-    def _evaluer_reponse_locale(self, pays_propose: str):
-        norm = normaliser(pays_propose)
-        match = next((p for p in self.pays_local if p["nom_normalise"] == norm), None)
-
-        if not match:
-            self._afficher_verdict({"valide": False,
-                "message": f"« {pays_propose} » n'existe pas ! Tu perds une vie."})
-            Clock.schedule_once(lambda dt: self._perdre_vie_solo(self.joueur_id, "Pays inexistant"), 0.5)
-        elif match["nom_normalise"] in self.pays_joues:
-            self._afficher_verdict({"valide": False,
-                "message": f"{match['nom']} a déjà été joué ! Tu perds une vie."})
-            Clock.schedule_once(lambda dt: self._perdre_vie_solo(self.joueur_id, "Pays déjà joué"), 0.5)
-        else:
-            self.pays_joues.add(match["nom_normalise"])
-            self.pays_joues_liste.append(match)
-            self._ajouter_drapeau(match)
-            self._afficher_verdict({"valide": True,
-                "message": f"✅ {match['nom']} est valide ! L'IA perd une vie."})
-            Clock.schedule_once(lambda dt: self._perdre_vie_solo("ia", "Langue au chat perdue"), 0.5)
-
-    def _perdre_vie_solo(self, joueur_id: str, raison: str):
-        if self._chrono_event:
-            self._chrono_event.cancel()
-
-        j = next((x for x in self.joueurs_solo if x["id"] == joueur_id), None)
-        if not j:
-            return
-
-        j["vies"] -= 1
-        if j["vies"] <= 0:
-            j["vies"] = 0
-            j["en_vie"] = False
-
-        vivants = [x for x in self.joueurs_solo if x["en_vie"]]
-        if len(vivants) <= 1:
-            Clock.schedule_once(lambda dt: self._afficher_fin_solo(vivants[0] if vivants else None), 0.8)
-            return
-
-        # Celui qui perd repart
-        self.index_tour = self.joueurs_solo.index(j)
-        Clock.schedule_once(lambda dt: self._nouveau_tour_solo(), 0.8)
-
-    def _passer_suivant_solo(self):
-        n = len(self.joueurs_solo)
-        for _ in range(n):
-            self.index_tour = (self.index_tour + 1) % n
-            if self.joueurs_solo[self.index_tour]["en_vie"]:
-                break
-        Clock.schedule_once(lambda dt: self._nouveau_tour_solo(), 0.15)
-
-    # ──────────────────────────────────────────────────────────
-    #  FIN DE PARTIE
-    # ──────────────────────────────────────────────────────────
-
-    def _afficher_fin(self, msg: dict):
-        if self._chrono_event:
-            self._chrono_event.cancel()
-        gagnant = next((j for j in msg.get("joueurs", []) if j["id"] == msg.get("gagnant")), None)
-        self.nom_gagnant = gagnant["nom"] if gagnant else "—"
-        ecran = self.root.get_screen("fin")
-        ecran.ids.stat_pays.text  = str(len(msg.get("pays_joues", [])))
-        ecran.ids.stat_tours.text = str(self.nb_tours)
-        ecran.ids.stat_vies.text  = str(gagnant["vies"] if gagnant else 0)
-        Clock.schedule_once(lambda dt: self._aller_ecran("fin"), 0.6)
-
-    def _afficher_fin_solo(self, gagnant):
-        if self._chrono_event:
-            self._chrono_event.cancel()
-        self.nom_gagnant = gagnant["nom"] if gagnant else "—"
-        ecran = self.root.get_screen("fin")
-        ecran.ids.stat_pays.text  = str(len(self.pays_joues_liste))
-        ecran.ids.stat_tours.text = str(self.nb_tours)
-        ecran.ids.stat_vies.text  = str(gagnant["vies"] if gagnant else 0)
-        self._aller_ecran("fin")
-
-    def retour_accueil(self):
-        if self._chrono_event:
-            self._chrono_event.cancel()
-        if self.ws:
-            self._run_async(self.ws.close())
-            self.ws = None
-        self._aller_ecran("accueil")
-
-    def rejouer(self):
-        if self._chrono_event:
-            self._chrono_event.cancel()
-        if self.mode_connecte:
-            self.retour_accueil()
-        else:
-            self._lancer_mode_solo()
-            Clock.schedule_once(lambda dt: self._demarrer_solo(), 0.3)
-
-    # ──────────────────────────────────────────────────────────
-    #  NAVIGATION
-    # ──────────────────────────────────────────────────────────
-
-    def _aller_ecran(self, nom: str):
-        self.root.current = nom
-
-    def _ajouter_chat(self, msg: dict):
-        pass  # Chat visuel non implémenté sur mobile (popup si besoin)
-
-
-# ──────────────────────────────────────────────────────────────
-#  LANCEMENT
-# ──────────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    PaysGameApp().run()
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAYS GAME 🌍</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════════════
+   VARIABLES & RESET
+══════════════════════════════════════════════════ */
+:root {
+  --ink:       #0d0f14;
+  --paper:     #f5f0e8;
+  --ocean:     #0a1628;
+  --ocean-mid: #112240;
+  --teal:      #00c9a7;
+  --amber:     #f4a947;
+  --crimson:   #e63946;
+  --gold:      #d4a853;
+  --muted:     #4a5568;
+  --grid:      rgba(0,201,167,0.06);
+
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 20px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--ocean);
+  color: var(--paper);
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 16px;
+  overflow-x: hidden;
+}
+
+/* Grille cartographique en fond */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 50%, rgba(0,201,167,0.05) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(244,169,71,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   UTILITAIRES
+══════════════════════════════════════════════════ */
+.hidden { display: none !important; }
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: 'DM Mono', monospace;
+  transition: all .18s ease;
+}
+
+input, select {
+  font-family: 'DM Mono', monospace;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--paper);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color .2s;
+}
+input:focus, select:focus { border-color: var(--teal); }
+input::placeholder { color: var(--muted); }
+select option { background: var(--ocean-mid); }
+
+/* ══════════════════════════════════════════════════
+   LAYOUT PRINCIPAL
+══════════════════════════════════════════════════ */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════════════════
+   ÉCRAN 1 — ACCUEIL
+══════════════════════════════════════════════════ */
+#screen-accueil {
+  gap: 0;
+}
+
+.logo-wrap {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: floatIn .8s cubic-bezier(.16,1,.3,1) both;
+}
+
+.logo-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--teal);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.logo-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(52px, 10vw, 88px);
+  font-weight: 900;
+  line-height: .9;
+  background: linear-gradient(135deg, var(--paper) 0%, var(--gold) 60%, var(--amber) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -2px;
+}
+
+.logo-globe {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 8px;
+  animation: spin-slow 20s linear infinite;
+  display: inline-block;
+}
+
+.card {
+  background: rgba(17,34,64,.85);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-lg);
+  padding: 32px;
+  width: 100%;
+  max-width: 420px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 24px 64px rgba(0,0,0,.5);
+  animation: floatIn .8s .15s cubic-bezier(.16,1,.3,1) both;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--teal);
+  text-transform: uppercase;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  font-size: 15px;
+}
+
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin-top: 4px;
+}
+
+.toggle-wrap span {
+  font-size: 14px;
+  color: rgba(245,240,232,0.7);
+}
+
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 24px;
+  cursor: pointer;
+  transition: .3s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  left: 3px; top: 3px;
+  width: 18px; height: 18px;
+  background: var(--paper);
+  border-radius: 50%;
+  transition: .3s;
+}
+.toggle input:checked + .toggle-slider { background: var(--teal); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+.separator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.separator::before, .separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--teal), #00a88d);
+  color: var(--ink);
+  font-weight: 700;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,201,167,.3); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: rgba(255,255,255,0.06);
+  color: var(--paper);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--teal);
+  padding: 10px;
+  font-size: 12px;
+}
+.btn-ghost:hover { color: var(--amber); }
+
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+.room-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all .15s;
+}
+.room-item:hover { background: rgba(0,201,167,0.08); border-color: var(--teal); }
+.room-item .room-id { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--gold); }
+.room-item .room-info { font-size: 12px; color: var(--muted); }
+
+/* ══════════════════════════════════════════════════
+   ÉCRAN 2 — LOBBY
+══════════════════════════════════════════════════ */
+#screen-lobby {
+  gap: 20px;
+}
+
+.lobby-header {
+  text-align: center;
+  animation: floatIn .5s cubic-bezier(.16,1,.3,1) both;
+}
+
+.lobby-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.room-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(212,168,83,0.15);
+  border: 1px solid rgba(212,168,83,0.3);
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  color: var(--gold);
+  letter-spacing: 4px;
+  margin-top: 8px;
+}
+
+.link-share {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px dashed rgba(255,255,255,0.15);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  width: 100%;
+  max-width: 420px;
+  text-align: left;
+  transition: all .15s;
+}
+.link-share:hover { border-color: var(--teal); color: var(--teal); }
+.link-share .link-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.player-slot {
+  background: rgba(255,255,255,0.04);
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: var(--r-md);
+  padding: 16px 10px;
+  text-align: center;
+  transition: all .3s;
+}
+.player-slot.filled {
+  border: 1px solid rgba(0,201,167,0.3);
+  background: rgba(0,201,167,0.06);
+  animation: popIn .3s cubic-bezier(.16,1,.3,1);
+}
+.player-slot .slot-avatar { font-size: 28px; margin-bottom: 6px; }
+.player-slot .slot-name { font-size: 13px; font-weight: 600; }
+.player-slot .slot-tag { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--teal); }
+
+.lobby-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ══════════════════════════════════════════════════
+   ÉCRAN 3 — JEU
+══════════════════════════════════════════════════ */
+#screen-jeu {
+  justify-content: flex-start;
+  padding: 0;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Bandeau scores */
+.scores-bar {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  background: rgba(17,34,64,.95);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.score-player {
+  flex: 1;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background .3s;
+}
+.score-player.active { background: rgba(0,201,167,0.08); }
+
+.score-player .player-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  opacity: 0.6;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.score-player.active .player-name { opacity: 1; color: var(--teal); }
+
+.lives-dots {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+.life-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--crimson);
+  transition: all .3s;
+}
+.life-dot.lost { background: rgba(255,255,255,0.1); }
+
+.score-vs {
+  padding: 12px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Chrono */
+.chrono-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+.chrono-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--amber));
+  width: 100%;
+  transition: width 1s linear, background .5s;
+  transform-origin: left;
+}
+.chrono-fill.urgent { background: linear-gradient(90deg, var(--amber), var(--crimson)); }
+
+/* Zone de jeu centrale */
+.game-main {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  gap: 16px;
+}
+
+/* Lettres en cours */
+.letters-display {
+  text-align: center;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.letters-sequence {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 8vw, 52px);
+  font-weight: 700;
+  letter-spacing: 8px;
+  color: var(--paper);
+  text-shadow: 0 0 30px rgba(0,201,167,.3);
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .3s;
+}
+.letters-sequence.invalid { color: var(--crimson); animation: shake .3s ease; }
+.letters-sequence.complete { color: var(--teal); }
+
+.turn-indicator {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--teal);
+  text-transform: uppercase;
+  animation: pulse 2s infinite;
+}
+
+.possibilities-count {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+/* Historique drapeaux */
+.flags-scroll {
+  width: 100%;
+  overflow-x: auto;
+  padding: 8px 0;
+}
+.flags-scroll::-webkit-scrollbar { height: 3px; }
+.flags-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+.flags-inner {
+  display: flex;
+  gap: 10px;
+  padding: 0 4px;
+  min-height: 52px;
+  align-items: center;
+}
+
+.flag-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  animation: popIn .3s cubic-bezier(.16,1,.3,1);
+}
+.flag-item img {
+  width: 48px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.flag-item .flag-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  color: var(--muted);
+  max-width: 48px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Clavier */
+.keyboard-wrap {
+  width: 100%;
+  padding: 0 4px;
+}
+
+.keyboard {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.key {
+  aspect-ratio: 1;
+  border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--paper);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all .12s;
+  position: relative;
+  overflow: hidden;
+}
+.key::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0,201,167,.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity .12s;
+}
+.key:hover:not(:disabled) { background: rgba(0,201,167,0.12); border-color: rgba(0,201,167,.4); transform: scale(1.05); }
+.key:hover::after { opacity: 1; }
+.key:active:not(:disabled) { transform: scale(0.95); }
+.key:disabled { opacity: 0.25; cursor: not-allowed; }
+
+/* Bouton langue au chat */
+.btn-langue {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--r-md);
+  background: rgba(230,57,70,0.12);
+  border: 1px solid rgba(230,57,70,0.25);
+  color: var(--crimson);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: all .2s;
+}
+.btn-langue:hover { background: rgba(230,57,70,0.2); border-color: var(--crimson); }
+.btn-langue:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ══════════════════════════════════════════════════
+   CHAT EN COURS DE PARTIE
+══════════════════════════════════════════════════ */
+.chat-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 260px;
+  background: rgba(10,22,40,.95);
+  border-left: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.16,1,.3,1);
+  z-index: 20;
+  backdrop-filter: blur(20px);
+}
+.chat-panel.open { transform: translateX(0); }
+
+.chat-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 80px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(17,34,64,.9);
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--paper);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 21;
+  transition: all .2s;
+  cursor: pointer;
+}
+.chat-toggle:hover { background: rgba(0,201,167,0.15); border-color: var(--teal); }
+.chat-toggle .notif {
+  position: absolute;
+  top: -2px; right: -2px;
+  width: 12px; height: 12px;
+  background: var(--crimson);
+  border-radius: 50%;
+  border: 2px solid var(--ocean);
+  display: none;
+}
+.chat-toggle .notif.show { display: block; }
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); }
+
+.chat-msg {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.chat-msg .msg-author {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--teal);
+  margin-bottom: 2px;
+}
+.chat-msg.system .msg-text {
+  color: var(--amber);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.chat-input-wrap {
+  padding: 12px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  gap: 8px;
+}
+.chat-input-wrap input { flex: 1; font-size: 13px; padding: 8px 10px; }
+.chat-input-wrap button {
+  background: var(--teal);
+  color: var(--ink);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ══════════════════════════════════════════════════
+   MODAL (langue au chat, fin de partie)
+══════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  animation: fadeIn .2s ease;
+}
+.modal-overlay.hidden { display: none; }
+
+.modal-box {
+  background: var(--ocean-mid);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--r-lg);
+  padding: 32px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(0,0,0,.6);
+  animation: floatIn .3s cubic-bezier(.16,1,.3,1);
+}
+
+.modal-emoji { font-size: 48px; margin-bottom: 12px; display: block; }
+
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.modal-text {
+  color: rgba(245,240,232,0.7);
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.modal-input {
+  width: 100%;
+  font-size: 18px;
+  font-family: 'Playfair Display', serif;
+  text-align: center;
+  padding: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.modal-actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* Verdict */
+.verdict-valid   { color: var(--teal); }
+.verdict-invalid { color: var(--crimson); }
+
+/* ══════════════════════════════════════════════════
+   FIN DE PARTIE
+══════════════════════════════════════════════════ */
+#screen-fin {
+  gap: 24px;
+}
+
+.winner-display {
+  text-align: center;
+  animation: floatIn .6s cubic-bezier(.16,1,.3,1) both;
+}
+
+.winner-crown { font-size: 64px; animation: bounce 1s ease infinite alternate; }
+
+.winner-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--gold), var(--amber));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 8px 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.stat-cell {
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--r-md);
+  padding: 16px 10px;
+  text-align: center;
+}
+.stat-cell .stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--teal);
+}
+.stat-cell .stat-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ══════════════════════════════════════════════════
+   NOTIFICATIONS TOAST
+══════════════════════════════════════════════════ */
+#toast-container {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 200;
+  pointer-events: none;
+  width: min(400px, 90vw);
+}
+
+.toast {
+  background: rgba(17,34,64,.95);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  font-size: 14px;
+  border-left: 3px solid var(--teal);
+  backdrop-filter: blur(20px);
+  animation: toastIn .3s cubic-bezier(.16,1,.3,1);
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+.toast.warn  { border-color: var(--amber); }
+.toast.error { border-color: var(--crimson); }
+.toast.exit  { animation: toastOut .3s ease forwards; }
+
+/* ══════════════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════════════ */
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-6px); }
+  40%,80% { transform: translateX(6px); }
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; } 50% { opacity: 0.5; }
+}
+@keyframes bounce {
+  from { transform: translateY(0); } to { transform: translateY(-10px); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); } to { transform: rotate(360deg); }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-10px); }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  #screen-jeu { max-width: 520px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     ÉCRAN 1 — ACCUEIL / CRÉATION
+═══════════════════════════════════════════════ -->
+<div id="screen-accueil" class="screen">
+  <div class="logo-wrap">
+    <div class="logo-sub">Le jeu des nations</div>
+    <span class="logo-globe">🌍</span>
+    <div class="logo-title">PAYS<br>GAME</div>
+  </div>
+
+  <div class="card">
+    <div class="form-group">
+      <label>Ton nom</label>
+      <input id="input-nom" type="text" placeholder="Ex: Alice" maxlength="20">
+    </div>
+
+    <div class="row-2">
+      <div class="form-group">
+        <label>Langue</label>
+        <select id="select-langue">
+          <option value="fr">🇫🇷 Français</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Vies</label>
+        <select id="select-vies">
+          <option value="5">5 vies</option>
+          <option value="10" selected>10 vies</option>
+          <option value="15">15 vies</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="form-group">
+        <label>Chrono</label>
+        <select id="select-temps">
+          <option value="10">10 sec</option>
+          <option value="15" selected>15 sec</option>
+          <option value="30">30 sec</option>
+          <option value="60">60 sec</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Joueurs max</label>
+        <select id="select-max">
+          <option value="2">2</option>
+          <option value="4" selected>4</option>
+          <option value="8">8</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="toggle-wrap">
+      <label class="toggle">
+        <input type="checkbox" id="toggle-mixte">
+        <span class="toggle-slider"></span>
+      </label>
+      <span>Mode mixte — pays <em>&</em> capitales</span>
+    </div>
+
+    <button class="btn btn-primary" onclick="creerPartie()">
+      🗺️ Créer une partie
+    </button>
+
+    <div class="separator">ou rejoindre</div>
+
+    <div class="form-group">
+      <label>Code de la salle</label>
+      <input id="input-room" type="text" placeholder="Ex: ABCDEF" maxlength="6" style="text-transform:uppercase;letter-spacing:4px">
+    </div>
+    <button class="btn btn-secondary" onclick="rejoindreParCode()">
+      Rejoindre →
+    </button>
+
+    <button class="btn btn-ghost" onclick="rafraichirRooms()" style="margin-top:8px">
+      ⟳ Parties publiques disponibles
+    </button>
+    <div id="rooms-list" class="rooms-list"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ÉCRAN 2 — LOBBY
+═══════════════════════════════════════════════ -->
+<div id="screen-lobby" class="screen hidden">
+  <div class="lobby-header">
+    <h2>Salle d'attente</h2>
+    <div class="room-badge" id="lobby-code">——</div>
+  </div>
+
+  <button class="link-share" onclick="copierLien()">
+    <span>🔗</span>
+    <span class="link-text" id="lien-partage">Chargement…</span>
+    <span style="color:var(--teal);font-size:11px">COPIER</span>
+  </button>
+
+  <div id="players-grid" class="players-grid"></div>
+
+  <div class="lobby-actions">
+    <button class="btn btn-secondary" onclick="ajouterIA()">
+      🤖 Ajouter un bot
+    </button>
+    <button class="btn btn-primary" id="btn-demarrer" onclick="demarrerPartie()">
+      ▶ Lancer la partie
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ÉCRAN 3 — JEU
+═══════════════════════════════════════════════ -->
+<div id="screen-jeu" class="screen hidden" style="padding:0">
+
+  <!-- Scores -->
+  <div class="scores-bar" id="scores-bar"></div>
+
+  <!-- Chrono -->
+  <div class="chrono-bar">
+    <div class="chrono-fill" id="chrono-fill"></div>
+  </div>
+
+  <!-- Zone principale -->
+  <div class="game-main">
+    <div class="letters-display">
+      <div class="letters-sequence" id="letters-seq">…</div>
+      <div class="turn-indicator" id="turn-indicator">En attente</div>
+      <div class="possibilities-count" id="poss-count"></div>
+    </div>
+
+    <!-- Historique drapeaux -->
+    <div class="flags-scroll">
+      <div class="flags-inner" id="flags-inner"></div>
+    </div>
+
+    <!-- Clavier -->
+    <div class="keyboard-wrap">
+      <div class="keyboard" id="keyboard"></div>
+    </div>
+
+    <!-- Langue au chat -->
+    <button class="btn-langue" id="btn-langue" onclick="demanderLangueAuChat()">
+      🗣 Donner ma langue au chat
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ÉCRAN 4 — FIN
+═══════════════════════════════════════════════ -->
+<div id="screen-fin" class="screen hidden">
+  <div class="winner-display">
+    <div class="winner-crown">👑</div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--teal)">VAINQUEUR</div>
+    <div class="winner-name" id="winner-name">—</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-cell">
+      <div class="stat-val" id="stat-pays">0</div>
+      <div class="stat-lbl">Pays joués</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val" id="stat-tours">0</div>
+      <div class="stat-lbl">Tours</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val" id="stat-vies">0</div>
+      <div class="stat-lbl">Vies restantes</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;width:100%;max-width:360px">
+    <button class="btn btn-secondary" style="flex:1" onclick="retourAccueil()">← Accueil</button>
+    <button class="btn btn-primary" style="flex:1" onclick="rejouerMeme()">↺ Rejouer</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     CHAT
+═══════════════════════════════════════════════ -->
+<button class="chat-toggle" onclick="toggleChat()">
+  💬
+  <span class="notif" id="chat-notif"></span>
+</button>
+
+<div class="chat-panel" id="chat-panel">
+  <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+    <span style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal)">CHAT</span>
+    <button onclick="toggleChat()" style="background:none;color:var(--muted);font-size:18px;line-height:1">×</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-wrap">
+    <input id="chat-input" type="text" placeholder="Message…" maxlength="200" onkeydown="if(e.key==='Enter')envoyerChat()">
+    <button onclick="envoyerChat()">↑</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MODAL — LANGUE AU CHAT
+═══════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-langue">
+  <div class="modal-box">
+    <span class="modal-emoji">🗣️</span>
+    <div class="modal-title">Langue au chat !</div>
+    <div class="modal-text" id="modal-langue-text">Quel pays avais-tu en tête ?</div>
+    <input class="modal-input" id="modal-langue-input" type="text" placeholder="FRANCE…"
+      onkeydown="if(event.key==='Enter')validerLangueAuChat()">
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="validerLangueAuChat()">Valider</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL — VERDICT -->
+<div class="modal-overlay hidden" id="modal-verdict">
+  <div class="modal-box">
+    <span class="modal-emoji" id="verdict-emoji">⚖️</span>
+    <div class="modal-title" id="verdict-title">Verdict</div>
+    <div class="modal-text" id="verdict-text"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="fermerVerdict()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+// ══════════════════════════════════════════════════
+//  ÉTAT GLOBAL
+// ══════════════════════════════════════════════════
+const STATE = {
+  // Connexion
+  ws: null,
+  serveur: null,           // URL WebSocket du serveur
+  roomId: null,
+  joueurId: crypto.randomUUID(),
+  nom: 'Joueur',
+  estCreateur: false,
+
+  // Partie
+  etat: null,              // snapshot serveur
+  tempsMax: 15,
+  tempsRestant: 15,
+  chronoInterval: null,
+  estMonTour: false,
+  nbTours: 0,
+
+  // Config
+  langue: 'fr',
+  modeMixte: false,
+};
+
+// URL du serveur — modifier selon ton hébergement
+// En local : ws://localhost:8000
+// En prod  : wss://ton-app.onrender.com
+const SERVEUR_HTTP = window.location.hostname === 'localhost'
+  ? 'http://localhost:8000'
+  : 'https://pays-game.onrender.com';   // ← À CHANGER EN PROD
+
+const SERVEUR_WS = SERVEUR_HTTP.replace('http', 'ws');
+
+// ══════════════════════════════════════════════════
+//  MODE SOLO (sans serveur) — données locales
+// ══════════════════════════════════════════════════
+let PAYS_LOCAL = null;
+
+async function chargerPaysLocal(langue) {
+  try {
+    const r = await fetch(`pays_${langue}.json`);
+    PAYS_LOCAL = await r.json();
+  } catch {
+    // Fallback minimal
+    PAYS_LOCAL = [
+      { nom: 'FRANCE', capitale: 'PARIS', code: 'fr', nom_normalise: 'FRANCE', capitale_normalisee: 'PARIS' },
+      { nom: 'ALLEMAGNE', capitale: 'BERLIN', code: 'de', nom_normalise: 'ALLEMAGNE', capitale_normalisee: 'BERLIN' },
+      { nom: 'ESPAGNE', capitale: 'MADRID', code: 'es', nom_normalise: 'ESPAGNE', capitale_normalisee: 'MADRID' },
+      { nom: 'ITALIE', capitale: 'ROME', code: 'it', nom_normalise: 'ITALIE', capitale_normalisee: 'ROME' },
+      { nom: 'BELGIQUE', capitale: 'BRUXELLES', code: 'be', nom_normalise: 'BELGIQUE', capitale_normalisee: 'BRUXELLES' },
+      { nom: 'PORTUGAL', capitale: 'LISBONNE', code: 'pt', nom_normalise: 'PORTUGAL', capitale_normalisee: 'LISBONNE' },
+      { nom: 'PAYS-BAS', capitale: 'AMSTERDAM', code: 'nl', nom_normalise: 'PAYS-BAS', capitale_normalisee: 'AMSTERDAM' },
+      { nom: 'SUISSE', capitale: 'BERNE', code: 'ch', nom_normalise: 'SUISSE', capitale_normalisee: 'BERNE' },
+      { nom: 'CANADA', capitale: 'OTTAWA', code: 'ca', nom_normalise: 'CANADA', capitale_normalisee: 'OTTAWA' },
+      { nom: 'CHINE', capitale: 'PÉKIN', code: 'cn', nom_normalise: 'CHINE', capitale_normalisee: 'PEKIN' },
+      { nom: 'JAPON', capitale: 'TOKYO', code: 'jp', nom_normalise: 'JAPON', capitale_normalisee: 'TOKYO' },
+    ];
+    toast('⚠️ Fichier pays non trouvé — mode démo avec pays limités', 'warn');
+  }
+}
+
+function normaliser(s) {
+  return s.toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Z\s\-']/g, '');
+}
+
+function chercherPossibilites(seq) {
+  if (!PAYS_LOCAL || !seq) return PAYS_LOCAL || [];
+  const s = normaliser(seq);
+  return PAYS_LOCAL.filter(p =>
+    p.nom_normalise.startsWith(s) ||
+    (STATE.modeMixte && p.capitale_normalisee.startsWith(s))
+  );
+}
+
+function estComplet(seq) {
+  const s = normaliser(seq);
+  return PAYS_LOCAL?.find(p =>
+    p.nom_normalise === s ||
+    (STATE.modeMixte && p.capitale_normalisee === s)
+  ) || null;
+}
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+function afficherEcran(id) {
+  ['screen-accueil','screen-lobby','screen-jeu','screen-fin'].forEach(s => {
+    document.getElementById(s).classList.toggle('hidden', s !== id);
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  ÉCRAN ACCUEIL
+// ══════════════════════════════════════════════════
+async function creerPartie() {
+  const nom = document.getElementById('input-nom').value.trim() || 'Joueur';
+  STATE.nom = nom;
+  STATE.langue = document.getElementById('select-langue').value;
+  STATE.modeMixte = document.getElementById('toggle-mixte').checked;
+  STATE.tempsMax = parseInt(document.getElementById('select-temps').value);
+  STATE.estCreateur = true;
+
+  await chargerPaysLocal(STATE.langue);
+
+  // Tenter connexion serveur, sinon mode solo vs IA
+  const connecte = await tenterConnexionServeur(true, {
+    langue: STATE.langue,
+    mode_mixte: STATE.modeMixte,
+    vies: parseInt(document.getElementById('select-vies').value),
+    temps: STATE.tempsMax,
+    max_joueurs: parseInt(document.getElementById('select-max').value),
+  });
+
+  if (!connecte) {
+    toast('🔌 Serveur non disponible — mode solo activé', 'warn');
+    lancerModeSolo();
+  }
+}
+
+async function rejoindreParCode() {
+  const code = document.getElementById('input-room').value.trim().toUpperCase();
+  const nom  = document.getElementById('input-nom').value.trim() || 'Joueur';
+  if (!code || code.length !== 6) { toast('Code invalide (6 lettres)', 'error'); return; }
+  STATE.nom = nom;
+  STATE.langue = document.getElementById('select-langue').value;
+  await chargerPaysLocal(STATE.langue);
+
+  const connecte = await tenterConnexionServeur(false, null, code);
+  if (!connecte) toast('Impossible de rejoindre — serveur indisponible', 'error');
+}
+
+async function rafraichirRooms() {
+  try {
+    const r = await fetch(`${SERVEUR_HTTP}/parties`, { signal: AbortSignal.timeout(3000) });
+    const rooms = await r.json();
+    const list = document.getElementById('rooms-list');
+    list.innerHTML = '';
+    if (!rooms.length) { list.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px">Aucune partie disponible</div>'; return; }
+    rooms.forEach(room => {
+      const div = document.createElement('div');
+      div.className = 'room-item';
+      div.innerHTML = `<span class="room-id">${room.room_id}</span><span class="room-info">${room.joueurs}/${room.max_joueurs} joueurs · ${room.langue === 'fr' ? '🇫🇷' : '🇬🇧'}</span>`;
+      div.onclick = () => {
+        document.getElementById('input-room').value = room.room_id;
+        rejoindreParCode();
+      };
+      list.appendChild(div);
+    });
+  } catch {
+    document.getElementById('rooms-list').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px">Serveur non disponible</div>';
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  CONNEXION WEBSOCKET
+// ══════════════════════════════════════════════════
+async function tenterConnexionServeur(creer, config, roomId = null) {
+  try {
+    if (creer) {
+      const r = await fetch(`${SERVEUR_HTTP}/parties`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+        signal: AbortSignal.timeout(4000),
+      });
+      const data = await r.json();
+      STATE.roomId = data.room_id;
+    } else {
+      STATE.roomId = roomId;
+    }
+
+    const ws = new WebSocket(
+      `${SERVEUR_WS}/ws/${STATE.roomId}/${STATE.joueurId}/${encodeURIComponent(STATE.nom)}`
+    );
+
+    return await new Promise((resolve) => {
+      const timer = setTimeout(() => { ws.close(); resolve(false); }, 5000);
+
+      ws.onopen = () => {
+        clearTimeout(timer);
+        STATE.ws = ws;
+        ws.onmessage = onMessage;
+        ws.onclose   = onClose;
+        ws.onerror   = () => {};
+        afficherLobby();
+        resolve(true);
+      };
+      ws.onerror = () => { clearTimeout(timer); resolve(false); };
+    });
+  } catch {
+    return false;
+  }
+}
+
+function envoyerWS(data) {
+  if (STATE.ws && STATE.ws.readyState === WebSocket.OPEN) {
+    STATE.ws.send(JSON.stringify(data));
+  }
+}
+
+function onMessage(evt) {
+  const msg = JSON.parse(evt.data);
+  traiterMessage(msg);
+}
+
+function onClose() {
+  STATE.ws = null;
+  if (!['screen-accueil','screen-fin'].some(s => !document.getElementById(s).classList.contains('hidden'))) {
+    toast('🔌 Déconnecté du serveur', 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  TRAITEMENT DES MESSAGES SERVEUR
+// ══════════════════════════════════════════════════
+function traiterMessage(msg) {
+  switch(msg.type) {
+    case 'etat':
+    case 'joueur_rejoint':
+    case 'joueur_parti':
+      mettreAJourEtat(msg);
+      break;
+
+    case 'partie_demarree':
+      mettreAJourEtat(msg);
+      afficherEcran('screen-jeu');
+      toast('🎮 La partie commence !');
+      break;
+
+    case 'nouveau_tour':
+      mettreAJourEtat(msg);
+      lancerChrono(msg.config?.temps || STATE.tempsMax);
+      STATE.nbTours++;
+      break;
+
+    case 'sequence_invalide':
+      mettreAJourEtat(msg);
+      document.getElementById('letters-seq').classList.add('invalid');
+      setTimeout(() => document.getElementById('letters-seq').classList.remove('invalid'), 600);
+      toast(`⚠️ ${msg.message}`, 'warn');
+      break;
+
+    case 'mot_complet':
+      mettreAJourEtat(msg);
+      document.getElementById('letters-seq').classList.add('complete');
+      ajouterDrapeau(msg.pays);
+      toast(`💀 ${msg.message}`, 'warn');
+      break;
+
+    case 'langue_au_chat':
+      mettreAJourEtat(msg);
+      if (msg.interpelle === STATE.joueurId) {
+        ouvrirModalLangueAuChat(msg.message);
+      } else {
+        toast(`🗣️ ${msg.message}`, 'warn');
+      }
+      break;
+
+    case 'verdict_langue_au_chat':
+      afficherVerdict(msg);
+      break;
+
+    case 'perte_vie':
+      mettreAJourEtat(msg);
+      toast(msg.message, msg.elimine ? 'error' : 'warn');
+      break;
+
+    case 'fin_partie':
+      mettreAJourEtat(msg);
+      afficherFinDePartie(msg);
+      break;
+
+    case 'chat':
+      ajouterMessageChat(msg);
+      break;
+
+    case 'ia_langue_au_chat':
+      toast(msg.message, 'warn');
+      break;
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  LOBBY
+// ══════════════════════════════════════════════════
+function afficherLobby() {
+  afficherEcran('screen-lobby');
+  document.getElementById('lobby-code').textContent = STATE.roomId;
+  const lien = `${window.location.href.split('?')[0]}?room=${STATE.roomId}`;
+  document.getElementById('lien-partage').textContent = lien;
+  document.getElementById('btn-demarrer').style.display = STATE.estCreateur ? '' : 'none';
+}
+
+function mettreAJourEtat(msg) {
+  STATE.etat = msg;
+
+  // Mettre à jour lobby
+  if (!document.getElementById('screen-lobby').classList.contains('hidden')) {
+    mettreAJourLobby(msg);
+  }
+
+  // Mettre à jour jeu
+  if (!document.getElementById('screen-jeu').classList.contains('hidden')) {
+    mettreAJourJeu(msg);
+  }
+}
+
+function mettreAJourLobby(msg) {
+  const joueurs = msg.joueurs || [];
+  const grid = document.getElementById('players-grid');
+  grid.innerHTML = '';
+
+  const avatars = ['🧑','👩','🧔','👱','🧕','👨‍💻','🧙','🦊'];
+  joueurs.forEach((j, i) => {
+    const div = document.createElement('div');
+    div.className = 'player-slot filled';
+    div.innerHTML = `
+      <div class="slot-avatar">${j.est_ia ? '🤖' : avatars[i % avatars.length]}</div>
+      <div class="slot-name">${j.nom}</div>
+      <div class="slot-tag">${j.est_ia ? 'BOT' : j.id === STATE.joueurId ? 'MOI' : 'EN LIGNE'}</div>
+    `;
+    grid.appendChild(div);
+  });
+
+  // Slots vides
+  const max = msg.config?.max_joueurs || 4;
+  for (let i = joueurs.length; i < Math.min(max, 4); i++) {
+    const div = document.createElement('div');
+    div.className = 'player-slot';
+    div.innerHTML = `<div class="slot-avatar" style="opacity:.2">👤</div><div class="slot-name" style="opacity:.2;font-size:11px">En attente…</div>`;
+    grid.appendChild(div);
+  }
+}
+
+async function ajouterIA() {
+  if (STATE.ws) {
+    try {
+      await fetch(`${SERVEUR_HTTP}/parties/${STATE.roomId}/ia`, { method: 'POST' });
+    } catch { toast('Serveur indisponible', 'error'); }
+  } else {
+    // Mode solo — ajouter IA locale
+    ajouterIALocale();
+  }
+}
+
+async function demarrerPartie() {
+  if (STATE.ws) {
+    try {
+      await fetch(`${SERVEUR_HTTP}/parties/${STATE.roomId}/demarrer?joueur_id=${STATE.joueurId}`, { method: 'POST' });
+    } catch { toast('Erreur serveur', 'error'); }
+  }
+}
+
+function copierLien() {
+  const lien = document.getElementById('lien-partage').textContent;
+  navigator.clipboard.writeText(lien).then(() => toast('🔗 Lien copié !'));
+}
+
+// ══════════════════════════════════════════════════
+//  MISE À JOUR DE L'INTERFACE DE JEU
+// ══════════════════════════════════════════════════
+function mettreAJourJeu(msg) {
+  // Séquence
+  const seq = msg.sequence || '';
+  const el = document.getElementById('letters-seq');
+  el.textContent = seq ? seq.split('').join(' · ') : '…';
+  el.className = 'letters-sequence';
+
+  // Indicateur de tour
+  const monTour = msg.joueur_actuel === STATE.joueurId;
+  STATE.estMonTour = monTour;
+  document.getElementById('turn-indicator').textContent =
+    monTour ? '⬇ Ton tour !' :
+    msg.joueurs?.find(j => j.id === msg.joueur_actuel)
+      ? `Tour de ${msg.joueurs.find(j => j.id === msg.joueur_actuel).nom}`
+      : '';
+
+  // Activer/désactiver clavier
+  document.querySelectorAll('.key').forEach(k => k.disabled = !monTour);
+  document.getElementById('btn-langue').disabled = monTour; // langue au chat = quand c'est PAS ton tour
+
+  // Possibilités
+  if (seq) {
+    const poss = chercherPossibilites(seq);
+    document.getElementById('poss-count').textContent =
+      poss.length ? `${poss.length} pays possible${poss.length > 1 ? 's' : ''}` : '';
+  } else {
+    document.getElementById('poss-count').textContent = '';
+  }
+
+  // Scores
+  mettreAJourScores(msg);
+}
+
+function mettreAJourScores(msg) {
+  const bar = document.getElementById('scores-bar');
+  bar.innerHTML = '';
+  const joueurs = msg.joueurs || [];
+
+  joueurs.forEach((j, i) => {
+    const div = document.createElement('div');
+    div.className = 'score-player' + (j.id === msg.joueur_actuel ? ' active' : '');
+
+    const dots = Array.from({ length: msg.config?.vies || 10 }, (_, k) => {
+      const perdu = k >= j.vies;
+      return `<div class="life-dot${perdu ? ' lost' : ''}"></div>`;
+    }).join('');
+
+    div.innerHTML = `
+      <div class="player-name">${j.est_ia ? '🤖' : ''}${j.nom}</div>
+      <div class="lives-dots">${dots}</div>
+    `;
+    bar.appendChild(div);
+
+    if (i < joueurs.length - 1) {
+      const vs = document.createElement('div');
+      vs.className = 'score-vs';
+      vs.textContent = 'VS';
+      bar.appendChild(vs);
+    }
+  });
+}
+
+function ajouterDrapeau(pays) {
+  const inner = document.getElementById('flags-inner');
+  const div = document.createElement('div');
+  div.className = 'flag-item';
+  div.innerHTML = `
+    <img src="https://flagcdn.com/w80/${pays.code}.png" alt="${pays.nom}"
+         onerror="this.style.display='none'">
+    <div class="flag-name">${pays.nom}</div>
+  `;
+  inner.appendChild(div);
+  inner.parentElement.scrollLeft = inner.scrollWidth;
+}
+
+// ══════════════════════════════════════════════════
+//  CLAVIER
+// ══════════════════════════════════════════════════
+function construireClavier() {
+  const kb = document.getElementById('keyboard');
+  kb.innerHTML = '';
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l => {
+    const btn = document.createElement('button');
+    btn.className = 'key';
+    btn.textContent = l;
+    btn.disabled = true;
+    btn.onclick = () => appuyerTouche(l);
+    kb.appendChild(btn);
+  });
+}
+
+function appuyerTouche(lettre) {
+  if (!STATE.estMonTour) return;
+
+  if (STATE.modeConnecte) {
+    envoyerWS({ action: 'lettre', lettre });
+  } else {
+    traiterLettreLocal(lettre);
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  CHRONO
+// ══════════════════════════════════════════════════
+function lancerChrono(secondes) {
+  clearInterval(STATE.chronoInterval);
+  STATE.tempsRestant = secondes;
+  STATE.tempsMax = secondes;
+  actualiserChrono();
+
+  STATE.chronoInterval = setInterval(() => {
+    STATE.tempsRestant--;
+    actualiserChrono();
+    if (STATE.tempsRestant <= 0) {
+      clearInterval(STATE.chronoInterval);
+      if (!STATE.modeConnecte && STATE.estMonTour) {
+        // Mode solo — temps écoulé
+        perdreVieLocal('⏰ Temps écoulé !');
+      }
+    }
+  }, 1000);
+}
+
+function actualiserChrono() {
+  const pct = (STATE.tempsRestant / STATE.tempsMax) * 100;
+  const fill = document.getElementById('chrono-fill');
+  fill.style.width = pct + '%';
+  fill.classList.toggle('urgent', STATE.tempsRestant <= 5);
+}
+
+// ══════════════════════════════════════════════════
+//  LANGUE AU CHAT
+// ══════════════════════════════════════════════════
+function demanderLangueAuChat() {
+  if (STATE.modeConnecte) {
+    envoyerWS({ action: 'langue_au_chat' });
+  } else {
+    demanderLangueAuChatLocal();
+  }
+}
+
+function ouvrirModalLangueAuChat(texte) {
+  document.getElementById('modal-langue-text').textContent = texte || 'Quel pays avais-tu en tête ?';
+  document.getElementById('modal-langue-input').value = '';
+  document.getElementById('modal-langue').classList.remove('hidden');
+  setTimeout(() => document.getElementById('modal-langue-input').focus(), 100);
+}
+
+function validerLangueAuChat() {
+  const pays = document.getElementById('modal-langue-input').value.trim();
+  if (!pays) return;
+  document.getElementById('modal-langue').classList.add('hidden');
+
+  if (STATE.modeConnecte) {
+    envoyerWS({ action: 'reponse_langue_au_chat', pays });
+  } else {
+    evaluerReponseLocal(pays);
+  }
+}
+
+function afficherVerdict(msg) {
+  document.getElementById('verdict-emoji').textContent = msg.valide ? '✅' : '❌';
+  document.getElementById('verdict-title').textContent = msg.valide ? 'Bravo !' : 'Perdu !';
+  document.getElementById('verdict-text').textContent = msg.message;
+  document.getElementById('modal-verdict').classList.remove('hidden');
+}
+
+function fermerVerdict() {
+  document.getElementById('modal-verdict').classList.add('hidden');
+}
+
+// ══════════════════════════════════════════════════
+//  CHAT
+// ══════════════════════════════════════════════════
+function toggleChat() {
+  document.getElementById('chat-panel').classList.toggle('open');
+  document.getElementById('chat-notif').classList.remove('show');
+}
+
+function envoyerChat() {
+  const input = document.getElementById('chat-input');
+  const texte = input.value.trim();
+  if (!texte) return;
+  input.value = '';
+  if (STATE.modeConnecte) {
+    envoyerWS({ action: 'chat', texte });
+  } else {
+    ajouterMessageChat({ type: 'chat', nom: STATE.nom, texte, heure: new Date().toLocaleTimeString('fr',{hour:'2-digit',minute:'2-digit'}) });
+  }
+}
+
+function ajouterMessageChat(msg) {
+  const el = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg' + (msg.joueur_id ? '' : ' system');
+  div.innerHTML = msg.joueur_id
+    ? `<div class="msg-author">${msg.nom} · ${msg.heure}</div><div class="msg-text">${escapeHtml(msg.texte)}</div>`
+    : `<div class="msg-text">${msg.message || msg.texte}</div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+
+  if (document.getElementById('chat-panel').classList.contains('open') === false) {
+    document.getElementById('chat-notif').classList.add('show');
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════════════════
+//  MODE SOLO (sans serveur) — IA locale
+// ══════════════════════════════════════════════════
+const SOLO = {
+  joueurs: [],
+  indexTour: 0,
+  sequence: '',
+  paysJoues: new Set(),
+  paysJouesList: [],
+  enAttenteLangueAuChat: false,
+  joueurFautif: null,
+  vies: {},
+};
+
+function lancerModeSolo() {
+  const vies = parseInt(document.getElementById('select-vies').value);
+  STATE.modeConnecte = false;
+
+  SOLO.joueurs = [
+    { id: STATE.joueurId, nom: STATE.nom, vies, en_vie: true, est_ia: false },
+    { id: 'ia', nom: '🤖 Ordinateur', vies, en_vie: true, est_ia: true },
+  ];
+  SOLO.indexTour = 0;
+  SOLO.sequence = '';
+  SOLO.paysJoues = new Set();
+  SOLO.paysJouesList = [];
+  SOLO.enAttenteLangueAuChat = false;
+  STATE.nbTours = 0;
+
+  afficherEcran('screen-lobby');
+  document.getElementById('lobby-code').textContent = 'SOLO';
+  document.getElementById('lien-partage').textContent = 'Mode solo — pas de lien disponible';
+  document.getElementById('btn-demarrer').style.display = '';
+  document.getElementById('btn-demarrer').onclick = demarrerSolo;
+
+  mettreAJourLobbyLocal();
+}
+
+function ajouterIALocale() {
+  if (SOLO.joueurs.length >= 4) return;
+  SOLO.joueurs.push({ id: `ia${SOLO.joueurs.length}`, nom: '🤖 Bot', vies: 10, en_vie: true, est_ia: true });
+  mettreAJourLobbyLocal();
+}
+
+function mettreAJourLobbyLocal() {
+  mettreAJourLobby({ joueurs: SOLO.joueurs, config: { max_joueurs: 4 } });
+}
+
+function demarrerSolo() {
+  afficherEcran('screen-jeu');
+  construireClavier();
+  nouveauTourSolo();
+}
+
+function joueurActuelSolo() { return SOLO.joueurs[SOLO.indexTour]; }
+
+function nouveauTourSolo() {
+  SOLO.sequence = '';
+  SOLO.enAttenteLangueAuChat = false;
+  SOLO.joueurFautif = null;
+  STATE.nbTours++;
+
+  const j = joueurActuelSolo();
+  STATE.estMonTour = j.id === STATE.joueurId;
+
+  mettreAJourJeu({
+    sequence: '',
+    joueur_actuel: j.id,
+    joueurs: SOLO.joueurs,
+    config: { vies: 10 },
+  });
+
+  lancerChrono(STATE.tempsMax);
+
+  if (j.est_ia) {
+    document.querySelectorAll('.key').forEach(k => k.disabled = true);
+    document.getElementById('btn-langue').disabled = false;
+    setTimeout(iaJouerSolo, Math.random() * 1500 + 1000);
+  } else {
+    document.querySelectorAll('.key').forEach(k => k.disabled = false);
+    document.getElementById('btn-langue').disabled = true;
+  }
+}
+
+function traiterLettreLocal(lettre) {
+  if (!STATE.estMonTour) return;
+  const nouvelleSeq = SOLO.sequence + normaliser(lettre);
+  const possibilites = chercherPossibilites(nouvelleSeq);
+
+  if (!possibilites.length) {
+    // Séquence invalide
+    document.getElementById('letters-seq').classList.add('invalid');
+    setTimeout(() => document.getElementById('letters-seq').classList.remove('invalid'), 600);
+    SOLO.sequence = nouvelleSeq;
+    SOLO.joueurFautif = STATE.joueurId;
+
+    mettreAJourJeu({ sequence: nouvelleSeq, joueur_actuel: STATE.joueurId, joueurs: SOLO.joueurs, config: { vies: 10 } });
+    toast('⚠️ Séquence invalide — attend la réaction de l\'IA', 'warn');
+
+    // Passer le tour à l'IA qui peut demander langue au chat
+    passerAuSuivantSolo(false);
+    return;
+  }
+
+  SOLO.sequence = nouvelleSeq;
+  const match = estComplet(nouvelleSeq);
+
+  if (match) {
+    if (SOLO.paysJoues.has(match.nom_normalise)) {
+      toast(`🔁 ${match.nom} a déjà été joué ! Tu perds une vie.`, 'error');
+      perdreVieLocal('Pays déjà joué');
+      return;
+    }
+    SOLO.paysJoues.add(match.nom_normalise);
+    SOLO.paysJouesList.push(match);
+    ajouterDrapeau(match);
+    document.getElementById('letters-seq').classList.add('complete');
+    toast(`💀 Tu as complété ${match.nom} — tu perds une vie !`, 'warn');
+    setTimeout(() => perdreVieLocal('Mot complet'), 1500);
+  } else {
+    mettreAJourJeu({ sequence: nouvelleSeq, joueur_actuel: STATE.joueurId, joueurs: SOLO.joueurs, config: { vies: 10 } });
+    passerAuSuivantSolo(true);
+  }
+}
+
+function iaJouerSolo() {
+  const seq = SOLO.sequence;
+  const possibilites = chercherPossibilites(seq);
+
+  if (!possibilites.length) {
+    // L'IA est piégée — elle donne sa langue au chat (si la séquence est invalide)
+    if (SOLO.joueurFautif && SOLO.joueurFautif !== 'ia') {
+      // C'est le joueur qui a créé la séquence invalide → l'IA interpelle
+      toast('🗣️ L\'IA demande une langue au chat ! Quel pays visais-tu ?', 'warn');
+      ouvrirModalLangueAuChat('L\'IA te demande : quel pays avais-tu en tête ?');
+      SOLO.enAttenteLangueAuChat = true;
+    } else {
+      toast('🤖 L\'IA donne sa langue au chat ! Elle perd une vie.', 'warn');
+      perdreVieSolo('ia', 'IA piégée');
+    }
+    return;
+  }
+
+  // L'IA joue intelligemment — évite de compléter si possible
+  let cibles = possibilites.filter(p => (p.nom_normalise || p.nom).length > seq.length + 1);
+  if (!cibles.length) cibles = possibilites;
+
+  const cible = cibles[Math.floor(Math.random() * cibles.length)];
+  const nom = cible.nom_normalise;
+  const lettresSuivantes = nom.slice(seq.length);
+  const lettre = lettresSuivantes[0];
+  const nouvelleSeq = seq + lettre;
+
+  SOLO.sequence = nouvelleSeq;
+  SOLO.joueurFautif = 'ia';
+
+  const match = estComplet(nouvelleSeq);
+  if (match) {
+    if (SOLO.paysJoues.has(match.nom_normalise)) {
+      toast(`🔁 L'IA a joué ${match.nom} déjà joué ! Elle perd une vie.`, 'warn');
+      perdreVieSolo('ia', 'Pays déjà joué');
+      return;
+    }
+    SOLO.paysJoues.add(match.nom_normalise);
+    SOLO.paysJouesList.push(match);
+    ajouterDrapeau(match);
+    mettreAJourJeu({ sequence: nouvelleSeq, joueur_actuel: 'ia', joueurs: SOLO.joueurs, config: { vies: 10 } });
+    toast(`💀 L'IA a complété ${match.nom} — elle perd une vie !`, 'warn');
+    setTimeout(() => perdreVieSolo('ia', 'Mot complet'), 1500);
+  } else {
+    mettreAJourJeu({ sequence: nouvelleSeq, joueur_actuel: 'ia', joueurs: SOLO.joueurs, config: { vies: 10 } });
+    passerAuSuivantSolo(true);
+  }
+}
+
+function evaluerReponseLocal(paysPropose) {
+  const norm = normaliser(paysPropose);
+  const match = PAYS_LOCAL?.find(p => p.nom_normalise === norm);
+
+  if (!match) {
+    afficherVerdict({ valide: false, message: `« ${paysPropose} » n'existe pas ! Tu perds une vie.` });
+    setTimeout(() => { fermerVerdict(); perdreVieLocal('Pays inexistant'); }, 0);
+  } else if (SOLO.paysJoues.has(match.nom_normalise)) {
+    afficherVerdict({ valide: false, message: `${match.nom} a déjà été joué ! Tu perds une vie.` });
+    setTimeout(() => { fermerVerdict(); perdreVieLocal('Pays déjà joué'); }, 0);
+  } else if (!match.nom_normalise.startsWith(normaliser(SOLO.sequence.slice(0, -1) || SOLO.sequence))) {
+    afficherVerdict({ valide: false, message: `${match.nom} ne correspond pas à la séquence. Tu perds une vie.` });
+    setTimeout(() => { fermerVerdict(); perdreVieLocal('Séquence incompatible'); }, 0);
+  } else {
+    // Valide ! L'IA perd une vie
+    SOLO.paysJoues.add(match.nom_normalise);
+    SOLO.paysJouesList.push(match);
+    ajouterDrapeau(match);
+    afficherVerdict({ valide: true, message: `✅ ${match.nom} est valide ! L'IA perd une vie.` });
+    setTimeout(() => { fermerVerdict(); perdreVieSolo('ia', 'Langue au chat perdue'); }, 0);
+  }
+}
+
+function demanderLangueAuChatLocal() {
+  if (SOLO.joueurFautif === STATE.joueurId || !SOLO.joueurFautif) return;
+
+  // Si la séquence précédente était invalide → interpeller l'IA
+  toast('🗣️ Tu demandes une langue au chat à l\'IA…', 'warn');
+  setTimeout(() => {
+    // L'IA "répond" avec un pays valide ou non
+    const seq = SOLO.sequence;
+    const possibilites = chercherPossibilites(seq);
+
+    if (possibilites.length) {
+      const pays = possibilites[Math.floor(Math.random() * possibilites.length)];
+      afficherVerdict({ valide: true, message: `L'IA répond : « ${pays.nom} ». C'est valide ! Tu perds une vie.` });
+      SOLO.paysJoues.add(pays.nom_normalise);
+      SOLO.paysJouesList.push(pays);
+      ajouterDrapeau(pays);
+      setTimeout(() => { fermerVerdict(); perdreVieLocal('Langue au chat perdue'); }, 0);
+    } else {
+      afficherVerdict({ valide: false, message: `L'IA ne trouve rien ! Elle perd une vie.` });
+      setTimeout(() => { fermerVerdict(); perdreVieSolo('ia', 'IA sans réponse'); }, 0);
+    }
+  }, 800);
+}
+
+function perdreVieLocal(raison) { perdreVieSolo(STATE.joueurId, raison); }
+
+function perdreVieSolo(joueurId, raison) {
+  clearInterval(STATE.chronoInterval);
+  const j = SOLO.joueurs.find(j => j.id === joueurId);
+  if (!j) return;
+  j.vies--;
+  if (j.vies <= 0) { j.vies = 0; j.en_vie = false; }
+
+  mettreAJourJeu({ sequence: '', joueur_actuel: null, joueurs: SOLO.joueurs, config: { vies: 10 } });
+
+  const vivants = SOLO.joueurs.filter(j => j.en_vie);
+  if (vivants.length <= 1) {
+    setTimeout(() => afficherFinDePartieLocal(vivants[0]), 800);
+    return;
+  }
+
+  // Celui qui perd repart en premier
+  SOLO.indexTour = SOLO.joueurs.indexOf(j);
+  setTimeout(nouveauTourSolo, 800);
+}
+
+function passerAuSuivantSolo(changer) {
+  if (changer) {
+    SOLO.indexTour = (SOLO.indexTour + 1) % SOLO.joueurs.length;
+    while (!SOLO.joueurs[SOLO.indexTour].en_vie)
+      SOLO.indexTour = (SOLO.indexTour + 1) % SOLO.joueurs.length;
+  }
+  setTimeout(nouveauTourSolo, 150);
+}
+
+// ══════════════════════════════════════════════════
+//  FIN DE PARTIE
+// ══════════════════════════════════════════════════
+function afficherFinDePartie(msg) {
+  clearInterval(STATE.chronoInterval);
+  const gagnant = msg.joueurs?.find(j => j.id === msg.gagnant);
+  document.getElementById('winner-name').textContent = gagnant ? gagnant.nom : '—';
+  document.getElementById('stat-pays').textContent = msg.pays_joues?.length || 0;
+  document.getElementById('stat-tours').textContent = STATE.nbTours;
+  document.getElementById('stat-vies').textContent = gagnant?.vies || 0;
+  setTimeout(() => afficherEcran('screen-fin'), 600);
+}
+
+function afficherFinDePartieLocal(gagnant) {
+  document.getElementById('winner-name').textContent = gagnant ? gagnant.nom : '—';
+  document.getElementById('stat-pays').textContent = SOLO.paysJouesList.length;
+  document.getElementById('stat-tours').textContent = STATE.nbTours;
+  document.getElementById('stat-vies').textContent = gagnant?.vies || 0;
+  afficherEcran('screen-fin');
+}
+
+function retourAccueil() {
+  clearInterval(STATE.chronoInterval);
+  if (STATE.ws) { STATE.ws.close(); STATE.ws = null; }
+  afficherEcran('screen-accueil');
+}
+
+function rejouerMeme() {
+  clearInterval(STATE.chronoInterval);
+  if (STATE.modeConnecte) {
+    retourAccueil();
+  } else {
+    lancerModeSolo();
+    demarrerSolo();
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  TOASTS
+// ══════════════════════════════════════════════════
+function toast(msg, type = '') {
+  const container = document.getElementById('toast-container');
+  const div = document.createElement('div');
+  div.className = 'toast' + (type ? ` ${type}` : '');
+  div.textContent = msg;
+  container.appendChild(div);
+  setTimeout(() => {
+    div.classList.add('exit');
+    setTimeout(() => div.remove(), 300);
+  }, 3500);
+}
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+function init() {
+  construireClavier();
+
+  // Rejoindre via lien ?
+  const params = new URLSearchParams(window.location.search);
+  const roomFromUrl = params.get('room');
+  if (roomFromUrl) {
+    document.getElementById('input-room').value = roomFromUrl.toUpperCase();
+    toast(`🔗 Code de salle détecté : ${roomFromUrl.toUpperCase()}`, '');
+  }
+
+  STATE.modeConnecte = false;
+}
+
+init();
+</script>
+</body>
+</html>
