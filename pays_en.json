@@ -1,0 +1,1346 @@
+[
+  {
+    "nom": "AFGHANISTAN",
+    "capitale": "KABOUL",
+    "code": "af",
+    "nom_normalise": "AFGHANISTAN",
+    "capitale_normalisee": "KABOUL"
+  },
+  {
+    "nom": "ALBANIA",
+    "capitale": "TIRANA",
+    "code": "al",
+    "nom_normalise": "ALBANIA",
+    "capitale_normalisee": "TIRANA"
+  },
+  {
+    "nom": "ALGERIA",
+    "capitale": "ALGER",
+    "code": "dz",
+    "nom_normalise": "ALGERIA",
+    "capitale_normalisee": "ALGER"
+  },
+  {
+    "nom": "ANDORRA",
+    "capitale": "ANDORRE-LA-VIEILLE",
+    "code": "ad",
+    "nom_normalise": "ANDORRA",
+    "capitale_normalisee": "ANDORRE-LA-VIEILLE"
+  },
+  {
+    "nom": "ANGOLA",
+    "capitale": "LUANDA",
+    "code": "ao",
+    "nom_normalise": "ANGOLA",
+    "capitale_normalisee": "LUANDA"
+  },
+  {
+    "nom": "ANTIGUA AND BARBUDA",
+    "capitale": "SAINT JOHN'S",
+    "code": "ag",
+    "nom_normalise": "ANTIGUA AND BARBUDA",
+    "capitale_normalisee": "SAINT JOHN'S"
+  },
+  {
+    "nom": "ARGENTINA",
+    "capitale": "BUENOS AIRES",
+    "code": "ar",
+    "nom_normalise": "ARGENTINA",
+    "capitale_normalisee": "BUENOS AIRES"
+  },
+  {
+    "nom": "ARMENIA",
+    "capitale": "EREVAN",
+    "code": "am",
+    "nom_normalise": "ARMENIA",
+    "capitale_normalisee": "EREVAN"
+  },
+  {
+    "nom": "AUSTRALIA",
+    "capitale": "CANBERRA",
+    "code": "au",
+    "nom_normalise": "AUSTRALIA",
+    "capitale_normalisee": "CANBERRA"
+  },
+  {
+    "nom": "AUSTRIA",
+    "capitale": "VIENNE",
+    "code": "at",
+    "nom_normalise": "AUSTRIA",
+    "capitale_normalisee": "VIENNE"
+  },
+  {
+    "nom": "AZERBAIJAN",
+    "capitale": "BAKOU",
+    "code": "az",
+    "nom_normalise": "AZERBAIJAN",
+    "capitale_normalisee": "BAKOU"
+  },
+  {
+    "nom": "BAHAMAS",
+    "capitale": "NASSAU",
+    "code": "bs",
+    "nom_normalise": "BAHAMAS",
+    "capitale_normalisee": "NASSAU"
+  },
+  {
+    "nom": "BAHRAIN",
+    "capitale": "MANAMA",
+    "code": "bh",
+    "nom_normalise": "BAHRAIN",
+    "capitale_normalisee": "MANAMA"
+  },
+  {
+    "nom": "BANGLADESH",
+    "capitale": "DACCA",
+    "code": "bd",
+    "nom_normalise": "BANGLADESH",
+    "capitale_normalisee": "DACCA"
+  },
+  {
+    "nom": "BARBADOS",
+    "capitale": "BRIDGETOWN",
+    "code": "bb",
+    "nom_normalise": "BARBADOS",
+    "capitale_normalisee": "BRIDGETOWN"
+  },
+  {
+    "nom": "BELARUS",
+    "capitale": "MINSK",
+    "code": "by",
+    "nom_normalise": "BELARUS",
+    "capitale_normalisee": "MINSK"
+  },
+  {
+    "nom": "BELGIUM",
+    "capitale": "BRUXELLES",
+    "code": "be",
+    "nom_normalise": "BELGIUM",
+    "capitale_normalisee": "BRUXELLES"
+  },
+  {
+    "nom": "BELIZE",
+    "capitale": "BELMOPAN",
+    "code": "bz",
+    "nom_normalise": "BELIZE",
+    "capitale_normalisee": "BELMOPAN"
+  },
+  {
+    "nom": "BENIN",
+    "capitale": "PORTO-NOVO",
+    "code": "bj",
+    "nom_normalise": "BENIN",
+    "capitale_normalisee": "PORTO-NOVO"
+  },
+  {
+    "nom": "BHUTAN",
+    "capitale": "THIMPHOU",
+    "code": "bt",
+    "nom_normalise": "BHUTAN",
+    "capitale_normalisee": "THIMPHOU"
+  },
+  {
+    "nom": "BOLIVIA",
+    "capitale": "SUCRE",
+    "code": "bo",
+    "nom_normalise": "BOLIVIA",
+    "capitale_normalisee": "SUCRE"
+  },
+  {
+    "nom": "BOSNIA AND HERZEGOVINA",
+    "capitale": "SARAJEVO",
+    "code": "ba",
+    "nom_normalise": "BOSNIA AND HERZEGOVINA",
+    "capitale_normalisee": "SARAJEVO"
+  },
+  {
+    "nom": "BOTSWANA",
+    "capitale": "GABORONE",
+    "code": "bw",
+    "nom_normalise": "BOTSWANA",
+    "capitale_normalisee": "GABORONE"
+  },
+  {
+    "nom": "BRAZIL",
+    "capitale": "BRASILIA",
+    "code": "br",
+    "nom_normalise": "BRAZIL",
+    "capitale_normalisee": "BRASILIA"
+  },
+  {
+    "nom": "BRUNEI",
+    "capitale": "BANDAR SERI BEGAWAN",
+    "code": "bn",
+    "nom_normalise": "BRUNEI",
+    "capitale_normalisee": "BANDAR SERI BEGAWAN"
+  },
+  {
+    "nom": "BULGARIA",
+    "capitale": "SOFIA",
+    "code": "bg",
+    "nom_normalise": "BULGARIA",
+    "capitale_normalisee": "SOFIA"
+  },
+  {
+    "nom": "BURKINA FASO",
+    "capitale": "OUAGADOUGOU",
+    "code": "bf",
+    "nom_normalise": "BURKINA FASO",
+    "capitale_normalisee": "OUAGADOUGOU"
+  },
+  {
+    "nom": "BURUNDI",
+    "capitale": "GITEGA",
+    "code": "bi",
+    "nom_normalise": "BURUNDI",
+    "capitale_normalisee": "GITEGA"
+  },
+  {
+    "nom": "CAMBODIA",
+    "capitale": "PHNOM PENH",
+    "code": "kh",
+    "nom_normalise": "CAMBODIA",
+    "capitale_normalisee": "PHNOM PENH"
+  },
+  {
+    "nom": "CAMEROON",
+    "capitale": "YAOUNDÉ",
+    "code": "cm",
+    "nom_normalise": "CAMEROON",
+    "capitale_normalisee": "YAOUNDE"
+  },
+  {
+    "nom": "CANADA",
+    "capitale": "OTTAWA",
+    "code": "ca",
+    "nom_normalise": "CANADA",
+    "capitale_normalisee": "OTTAWA"
+  },
+  {
+    "nom": "CAPE VERDE",
+    "capitale": "PRAIA",
+    "code": "cv",
+    "nom_normalise": "CAPE VERDE",
+    "capitale_normalisee": "PRAIA"
+  },
+  {
+    "nom": "CENTRAL AFRICAN REPUBLIC",
+    "capitale": "BANGUI",
+    "code": "cf",
+    "nom_normalise": "CENTRAL AFRICAN REPUBLIC",
+    "capitale_normalisee": "BANGUI"
+  },
+  {
+    "nom": "CHAD",
+    "capitale": "N'DJAMÉNA",
+    "code": "td",
+    "nom_normalise": "CHAD",
+    "capitale_normalisee": "N'DJAMENA"
+  },
+  {
+    "nom": "CHILE",
+    "capitale": "SANTIAGO",
+    "code": "cl",
+    "nom_normalise": "CHILE",
+    "capitale_normalisee": "SANTIAGO"
+  },
+  {
+    "nom": "CHINA",
+    "capitale": "PÉKIN",
+    "code": "cn",
+    "nom_normalise": "CHINA",
+    "capitale_normalisee": "PEKIN"
+  },
+  {
+    "nom": "COLOMBIA",
+    "capitale": "BOGOTA",
+    "code": "co",
+    "nom_normalise": "COLOMBIA",
+    "capitale_normalisee": "BOGOTA"
+  },
+  {
+    "nom": "COMOROS",
+    "capitale": "MORONI",
+    "code": "km",
+    "nom_normalise": "COMOROS",
+    "capitale_normalisee": "MORONI"
+  },
+  {
+    "nom": "CONGO",
+    "capitale": "BRAZZAVILLE",
+    "code": "cg",
+    "nom_normalise": "CONGO",
+    "capitale_normalisee": "BRAZZAVILLE"
+  },
+  {
+    "nom": "COSTA RICA",
+    "capitale": "SAN JOSÉ",
+    "code": "cr",
+    "nom_normalise": "COSTA RICA",
+    "capitale_normalisee": "SAN JOSE"
+  },
+  {
+    "nom": "CROATIA",
+    "capitale": "ZAGREB",
+    "code": "hr",
+    "nom_normalise": "CROATIA",
+    "capitale_normalisee": "ZAGREB"
+  },
+  {
+    "nom": "CUBA",
+    "capitale": "LA HAVANE",
+    "code": "cu",
+    "nom_normalise": "CUBA",
+    "capitale_normalisee": "LA HAVANE"
+  },
+  {
+    "nom": "CYPRUS",
+    "capitale": "NICOSIE",
+    "code": "cy",
+    "nom_normalise": "CYPRUS",
+    "capitale_normalisee": "NICOSIE"
+  },
+  {
+    "nom": "CZECH REPUBLIC",
+    "capitale": "PRAGUE",
+    "code": "cz",
+    "nom_normalise": "CZECH REPUBLIC",
+    "capitale_normalisee": "PRAGUE"
+  },
+  {
+    "nom": "DENMARK",
+    "capitale": "COPENHAGUE",
+    "code": "dk",
+    "nom_normalise": "DENMARK",
+    "capitale_normalisee": "COPENHAGUE"
+  },
+  {
+    "nom": "DJIBOUTI",
+    "capitale": "DJIBOUTI",
+    "code": "dj",
+    "nom_normalise": "DJIBOUTI",
+    "capitale_normalisee": "DJIBOUTI"
+  },
+  {
+    "nom": "DOMINICA",
+    "capitale": "ROSEAU",
+    "code": "dm",
+    "nom_normalise": "DOMINICA",
+    "capitale_normalisee": "ROSEAU"
+  },
+  {
+    "nom": "EAST TIMOR",
+    "capitale": "DILI",
+    "code": "tl",
+    "nom_normalise": "EAST TIMOR",
+    "capitale_normalisee": "DILI"
+  },
+  {
+    "nom": "ECUADOR",
+    "capitale": "QUITO",
+    "code": "ec",
+    "nom_normalise": "ECUADOR",
+    "capitale_normalisee": "QUITO"
+  },
+  {
+    "nom": "EGYPT",
+    "capitale": "LE CAIRE",
+    "code": "eg",
+    "nom_normalise": "EGYPT",
+    "capitale_normalisee": "LE CAIRE"
+  },
+  {
+    "nom": "EL SALVADOR",
+    "capitale": "SAN SALVADOR",
+    "code": "sv",
+    "nom_normalise": "EL SALVADOR",
+    "capitale_normalisee": "SAN SALVADOR"
+  },
+  {
+    "nom": "EQUATORIAL GUINEA",
+    "capitale": "MALABO",
+    "code": "gq",
+    "nom_normalise": "EQUATORIAL GUINEA",
+    "capitale_normalisee": "MALABO"
+  },
+  {
+    "nom": "ERITREA",
+    "capitale": "ASMARA",
+    "code": "er",
+    "nom_normalise": "ERITREA",
+    "capitale_normalisee": "ASMARA"
+  },
+  {
+    "nom": "ESTONIA",
+    "capitale": "TALLINN",
+    "code": "ee",
+    "nom_normalise": "ESTONIA",
+    "capitale_normalisee": "TALLINN"
+  },
+  {
+    "nom": "ESWATINI",
+    "capitale": "MBABANE",
+    "code": "sz",
+    "nom_normalise": "ESWATINI",
+    "capitale_normalisee": "MBABANE"
+  },
+  {
+    "nom": "ETHIOPIA",
+    "capitale": "ADDIS-ABEBA",
+    "code": "et",
+    "nom_normalise": "ETHIOPIA",
+    "capitale_normalisee": "ADDIS-ABEBA"
+  },
+  {
+    "nom": "FIJI",
+    "capitale": "SUVA",
+    "code": "fj",
+    "nom_normalise": "FIJI",
+    "capitale_normalisee": "SUVA"
+  },
+  {
+    "nom": "FINLAND",
+    "capitale": "HELSINKI",
+    "code": "fi",
+    "nom_normalise": "FINLAND",
+    "capitale_normalisee": "HELSINKI"
+  },
+  {
+    "nom": "FRANCE",
+    "capitale": "PARIS",
+    "code": "fr",
+    "nom_normalise": "FRANCE",
+    "capitale_normalisee": "PARIS"
+  },
+  {
+    "nom": "GABON",
+    "capitale": "LIBREVILLE",
+    "code": "ga",
+    "nom_normalise": "GABON",
+    "capitale_normalisee": "LIBREVILLE"
+  },
+  {
+    "nom": "GAMBIA",
+    "capitale": "BANJUL",
+    "code": "gm",
+    "nom_normalise": "GAMBIA",
+    "capitale_normalisee": "BANJUL"
+  },
+  {
+    "nom": "GEORGIA",
+    "capitale": "TBILISSI",
+    "code": "ge",
+    "nom_normalise": "GEORGIA",
+    "capitale_normalisee": "TBILISSI"
+  },
+  {
+    "nom": "GERMANY",
+    "capitale": "BERLIN",
+    "code": "de",
+    "nom_normalise": "GERMANY",
+    "capitale_normalisee": "BERLIN"
+  },
+  {
+    "nom": "GHANA",
+    "capitale": "ACCRA",
+    "code": "gh",
+    "nom_normalise": "GHANA",
+    "capitale_normalisee": "ACCRA"
+  },
+  {
+    "nom": "GREECE",
+    "capitale": "ATHÈNES",
+    "code": "gr",
+    "nom_normalise": "GREECE",
+    "capitale_normalisee": "ATHENES"
+  },
+  {
+    "nom": "GRENADA",
+    "capitale": "SAINT-GEORGE'S",
+    "code": "gd",
+    "nom_normalise": "GRENADA",
+    "capitale_normalisee": "SAINT-GEORGE'S"
+  },
+  {
+    "nom": "GUATEMALA",
+    "capitale": "GUATEMALA CITY",
+    "code": "gt",
+    "nom_normalise": "GUATEMALA",
+    "capitale_normalisee": "GUATEMALA CITY"
+  },
+  {
+    "nom": "GUINEA",
+    "capitale": "CONAKRY",
+    "code": "gn",
+    "nom_normalise": "GUINEA",
+    "capitale_normalisee": "CONAKRY"
+  },
+  {
+    "nom": "GUINEA-BISSAU",
+    "capitale": "BISSAU",
+    "code": "gw",
+    "nom_normalise": "GUINEA-BISSAU",
+    "capitale_normalisee": "BISSAU"
+  },
+  {
+    "nom": "GUYANA",
+    "capitale": "GEORGETOWN",
+    "code": "gy",
+    "nom_normalise": "GUYANA",
+    "capitale_normalisee": "GEORGETOWN"
+  },
+  {
+    "nom": "HAITI",
+    "capitale": "PORT-AU-PRINCE",
+    "code": "ht",
+    "nom_normalise": "HAITI",
+    "capitale_normalisee": "PORT-AU-PRINCE"
+  },
+  {
+    "nom": "HONDURAS",
+    "capitale": "TEGUCIGALPA",
+    "code": "hn",
+    "nom_normalise": "HONDURAS",
+    "capitale_normalisee": "TEGUCIGALPA"
+  },
+  {
+    "nom": "HUNGARY",
+    "capitale": "BUDAPEST",
+    "code": "hu",
+    "nom_normalise": "HUNGARY",
+    "capitale_normalisee": "BUDAPEST"
+  },
+  {
+    "nom": "ICELAND",
+    "capitale": "REYKJAVIK",
+    "code": "is",
+    "nom_normalise": "ICELAND",
+    "capitale_normalisee": "REYKJAVIK"
+  },
+  {
+    "nom": "INDIA",
+    "capitale": "NEW DELHI",
+    "code": "in",
+    "nom_normalise": "INDIA",
+    "capitale_normalisee": "NEW DELHI"
+  },
+  {
+    "nom": "INDONESIA",
+    "capitale": "JAKARTA",
+    "code": "id",
+    "nom_normalise": "INDONESIA",
+    "capitale_normalisee": "JAKARTA"
+  },
+  {
+    "nom": "IRAN",
+    "capitale": "TÉHÉRAN",
+    "code": "ir",
+    "nom_normalise": "IRAN",
+    "capitale_normalisee": "TEHERAN"
+  },
+  {
+    "nom": "IRAQ",
+    "capitale": "BAGDAD",
+    "code": "iq",
+    "nom_normalise": "IRAQ",
+    "capitale_normalisee": "BAGDAD"
+  },
+  {
+    "nom": "IRELAND",
+    "capitale": "DUBLIN",
+    "code": "ie",
+    "nom_normalise": "IRELAND",
+    "capitale_normalisee": "DUBLIN"
+  },
+  {
+    "nom": "ISRAEL",
+    "capitale": "JÉRUSALEM",
+    "code": "il",
+    "nom_normalise": "ISRAEL",
+    "capitale_normalisee": "JERUSALEM"
+  },
+  {
+    "nom": "ITALY",
+    "capitale": "ROME",
+    "code": "it",
+    "nom_normalise": "ITALY",
+    "capitale_normalisee": "ROME"
+  },
+  {
+    "nom": "IVORY COAST",
+    "capitale": "YAMOUSSOUKRO",
+    "code": "ci",
+    "nom_normalise": "IVORY COAST",
+    "capitale_normalisee": "YAMOUSSOUKRO"
+  },
+  {
+    "nom": "JAMAICA",
+    "capitale": "KINGSTON",
+    "code": "jm",
+    "nom_normalise": "JAMAICA",
+    "capitale_normalisee": "KINGSTON"
+  },
+  {
+    "nom": "JAPAN",
+    "capitale": "TOKYO",
+    "code": "jp",
+    "nom_normalise": "JAPAN",
+    "capitale_normalisee": "TOKYO"
+  },
+  {
+    "nom": "JORDAN",
+    "capitale": "AMMAN",
+    "code": "jo",
+    "nom_normalise": "JORDAN",
+    "capitale_normalisee": "AMMAN"
+  },
+  {
+    "nom": "KAZAKHSTAN",
+    "capitale": "ASTANA",
+    "code": "kz",
+    "nom_normalise": "KAZAKHSTAN",
+    "capitale_normalisee": "ASTANA"
+  },
+  {
+    "nom": "KENYA",
+    "capitale": "NAIROBI",
+    "code": "ke",
+    "nom_normalise": "KENYA",
+    "capitale_normalisee": "NAIROBI"
+  },
+  {
+    "nom": "KIRIBATI",
+    "capitale": "SOUTH TARAWA",
+    "code": "ki",
+    "nom_normalise": "KIRIBATI",
+    "capitale_normalisee": "SOUTH TARAWA"
+  },
+  {
+    "nom": "KUWAIT",
+    "capitale": "KOWEÏT CITY",
+    "code": "kw",
+    "nom_normalise": "KUWAIT",
+    "capitale_normalisee": "KOWEIT CITY"
+  },
+  {
+    "nom": "KYRGYZSTAN",
+    "capitale": "BICHKEK",
+    "code": "kg",
+    "nom_normalise": "KYRGYZSTAN",
+    "capitale_normalisee": "BICHKEK"
+  },
+  {
+    "nom": "LAOS",
+    "capitale": "VIENTIANE",
+    "code": "la",
+    "nom_normalise": "LAOS",
+    "capitale_normalisee": "VIENTIANE"
+  },
+  {
+    "nom": "LATVIA",
+    "capitale": "RIGA",
+    "code": "lv",
+    "nom_normalise": "LATVIA",
+    "capitale_normalisee": "RIGA"
+  },
+  {
+    "nom": "LEBANON",
+    "capitale": "BEYROUTH",
+    "code": "lb",
+    "nom_normalise": "LEBANON",
+    "capitale_normalisee": "BEYROUTH"
+  },
+  {
+    "nom": "LESOTHO",
+    "capitale": "MASERU",
+    "code": "ls",
+    "nom_normalise": "LESOTHO",
+    "capitale_normalisee": "MASERU"
+  },
+  {
+    "nom": "LIBERIA",
+    "capitale": "MONROVIA",
+    "code": "lr",
+    "nom_normalise": "LIBERIA",
+    "capitale_normalisee": "MONROVIA"
+  },
+  {
+    "nom": "LIBYA",
+    "capitale": "TRIPOLI",
+    "code": "ly",
+    "nom_normalise": "LIBYA",
+    "capitale_normalisee": "TRIPOLI"
+  },
+  {
+    "nom": "LIECHTENSTEIN",
+    "capitale": "VADUZ",
+    "code": "li",
+    "nom_normalise": "LIECHTENSTEIN",
+    "capitale_normalisee": "VADUZ"
+  },
+  {
+    "nom": "LITHUANIA",
+    "capitale": "VILNIUS",
+    "code": "lt",
+    "nom_normalise": "LITHUANIA",
+    "capitale_normalisee": "VILNIUS"
+  },
+  {
+    "nom": "LUXEMBOURG",
+    "capitale": "LUXEMBOURG",
+    "code": "lu",
+    "nom_normalise": "LUXEMBOURG",
+    "capitale_normalisee": "LUXEMBOURG"
+  },
+  {
+    "nom": "MADAGASCAR",
+    "capitale": "ANTANANARIVO",
+    "code": "mg",
+    "nom_normalise": "MADAGASCAR",
+    "capitale_normalisee": "ANTANANARIVO"
+  },
+  {
+    "nom": "MALAWI",
+    "capitale": "LILONGWE",
+    "code": "mw",
+    "nom_normalise": "MALAWI",
+    "capitale_normalisee": "LILONGWE"
+  },
+  {
+    "nom": "MALAYSIA",
+    "capitale": "KUALA LUMPUR",
+    "code": "my",
+    "nom_normalise": "MALAYSIA",
+    "capitale_normalisee": "KUALA LUMPUR"
+  },
+  {
+    "nom": "MALDIVES",
+    "capitale": "MALÉ",
+    "code": "mv",
+    "nom_normalise": "MALDIVES",
+    "capitale_normalisee": "MALE"
+  },
+  {
+    "nom": "MALI",
+    "capitale": "BAMAKO",
+    "code": "ml",
+    "nom_normalise": "MALI",
+    "capitale_normalisee": "BAMAKO"
+  },
+  {
+    "nom": "MALTA",
+    "capitale": "LA VALETTE",
+    "code": "mt",
+    "nom_normalise": "MALTA",
+    "capitale_normalisee": "LA VALETTE"
+  },
+  {
+    "nom": "MARSHALL ISLANDS",
+    "capitale": "MAJURO",
+    "code": "mh",
+    "nom_normalise": "MARSHALL ISLANDS",
+    "capitale_normalisee": "MAJURO"
+  },
+  {
+    "nom": "MAURITANIA",
+    "capitale": "NOUAKCHOTT",
+    "code": "mr",
+    "nom_normalise": "MAURITANIA",
+    "capitale_normalisee": "NOUAKCHOTT"
+  },
+  {
+    "nom": "MAURITIUS",
+    "capitale": "PORT-LOUIS",
+    "code": "mu",
+    "nom_normalise": "MAURITIUS",
+    "capitale_normalisee": "PORT-LOUIS"
+  },
+  {
+    "nom": "MEXICO",
+    "capitale": "MEXICO",
+    "code": "mx",
+    "nom_normalise": "MEXICO",
+    "capitale_normalisee": "MEXICO"
+  },
+  {
+    "nom": "MICRONESIA",
+    "capitale": "PALIKIR",
+    "code": "fm",
+    "nom_normalise": "MICRONESIA",
+    "capitale_normalisee": "PALIKIR"
+  },
+  {
+    "nom": "MOLDOVA",
+    "capitale": "CHIȘINĂU",
+    "code": "md",
+    "nom_normalise": "MOLDOVA",
+    "capitale_normalisee": "CHISINAU"
+  },
+  {
+    "nom": "MONACO",
+    "capitale": "MONACO",
+    "code": "mc",
+    "nom_normalise": "MONACO",
+    "capitale_normalisee": "MONACO"
+  },
+  {
+    "nom": "MONGOLIA",
+    "capitale": "OULAN-BATOR",
+    "code": "mn",
+    "nom_normalise": "MONGOLIA",
+    "capitale_normalisee": "OULAN-BATOR"
+  },
+  {
+    "nom": "MONTENEGRO",
+    "capitale": "PODGORICA",
+    "code": "me",
+    "nom_normalise": "MONTENEGRO",
+    "capitale_normalisee": "PODGORICA"
+  },
+  {
+    "nom": "MOROCCO",
+    "capitale": "RABAT",
+    "code": "ma",
+    "nom_normalise": "MOROCCO",
+    "capitale_normalisee": "RABAT"
+  },
+  {
+    "nom": "MOZAMBIQUE",
+    "capitale": "MAPUTO",
+    "code": "mz",
+    "nom_normalise": "MOZAMBIQUE",
+    "capitale_normalisee": "MAPUTO"
+  },
+  {
+    "nom": "MYANMAR",
+    "capitale": "NAY PYI TAW",
+    "code": "mm",
+    "nom_normalise": "MYANMAR",
+    "capitale_normalisee": "NAY PYI TAW"
+  },
+  {
+    "nom": "NAMIBIA",
+    "capitale": "WINDHOEK",
+    "code": "na",
+    "nom_normalise": "NAMIBIA",
+    "capitale_normalisee": "WINDHOEK"
+  },
+  {
+    "nom": "NAURU",
+    "capitale": "YAREN",
+    "code": "nr",
+    "nom_normalise": "NAURU",
+    "capitale_normalisee": "YAREN"
+  },
+  {
+    "nom": "NEPAL",
+    "capitale": "KATMANDOU",
+    "code": "np",
+    "nom_normalise": "NEPAL",
+    "capitale_normalisee": "KATMANDOU"
+  },
+  {
+    "nom": "NETHERLANDS",
+    "capitale": "AMSTERDAM",
+    "code": "nl",
+    "nom_normalise": "NETHERLANDS",
+    "capitale_normalisee": "AMSTERDAM"
+  },
+  {
+    "nom": "NEW ZEALAND",
+    "capitale": "WELLINGTON",
+    "code": "nz",
+    "nom_normalise": "NEW ZEALAND",
+    "capitale_normalisee": "WELLINGTON"
+  },
+  {
+    "nom": "NICARAGUA",
+    "capitale": "MANAGUA",
+    "code": "ni",
+    "nom_normalise": "NICARAGUA",
+    "capitale_normalisee": "MANAGUA"
+  },
+  {
+    "nom": "NIGER",
+    "capitale": "NIAMEY",
+    "code": "ne",
+    "nom_normalise": "NIGER",
+    "capitale_normalisee": "NIAMEY"
+  },
+  {
+    "nom": "NIGERIA",
+    "capitale": "ABUJA",
+    "code": "ng",
+    "nom_normalise": "NIGERIA",
+    "capitale_normalisee": "ABUJA"
+  },
+  {
+    "nom": "NORTH KOREA",
+    "capitale": "PYONGYANG",
+    "code": "kp",
+    "nom_normalise": "NORTH KOREA",
+    "capitale_normalisee": "PYONGYANG"
+  },
+  {
+    "nom": "NORTH MACEDONIA",
+    "capitale": "SKOPJE",
+    "code": "mk",
+    "nom_normalise": "NORTH MACEDONIA",
+    "capitale_normalisee": "SKOPJE"
+  },
+  {
+    "nom": "NORWAY",
+    "capitale": "OSLO",
+    "code": "no",
+    "nom_normalise": "NORWAY",
+    "capitale_normalisee": "OSLO"
+  },
+  {
+    "nom": "OMAN",
+    "capitale": "MASCATE",
+    "code": "om",
+    "nom_normalise": "OMAN",
+    "capitale_normalisee": "MASCATE"
+  },
+  {
+    "nom": "PAKISTAN",
+    "capitale": "ISLAMABAD",
+    "code": "pk",
+    "nom_normalise": "PAKISTAN",
+    "capitale_normalisee": "ISLAMABAD"
+  },
+  {
+    "nom": "PALAU",
+    "capitale": "NGERULMUD",
+    "code": "pw",
+    "nom_normalise": "PALAU",
+    "capitale_normalisee": "NGERULMUD"
+  },
+  {
+    "nom": "PALESTINE",
+    "capitale": "RAMALLAH",
+    "code": "ps",
+    "nom_normalise": "PALESTINE",
+    "capitale_normalisee": "RAMALLAH"
+  },
+  {
+    "nom": "PANAMA",
+    "capitale": "PANAMA CITY",
+    "code": "pa",
+    "nom_normalise": "PANAMA",
+    "capitale_normalisee": "PANAMA CITY"
+  },
+  {
+    "nom": "PAPUA NEW GUINEA",
+    "capitale": "PORT MORESBY",
+    "code": "pg",
+    "nom_normalise": "PAPUA NEW GUINEA",
+    "capitale_normalisee": "PORT MORESBY"
+  },
+  {
+    "nom": "PARAGUAY",
+    "capitale": "ASUNCION",
+    "code": "py",
+    "nom_normalise": "PARAGUAY",
+    "capitale_normalisee": "ASUNCION"
+  },
+  {
+    "nom": "PERU",
+    "capitale": "LIMA",
+    "code": "pe",
+    "nom_normalise": "PERU",
+    "capitale_normalisee": "LIMA"
+  },
+  {
+    "nom": "PHILIPPINES",
+    "capitale": "MANILLE",
+    "code": "ph",
+    "nom_normalise": "PHILIPPINES",
+    "capitale_normalisee": "MANILLE"
+  },
+  {
+    "nom": "POLAND",
+    "capitale": "VARSOVIE",
+    "code": "pl",
+    "nom_normalise": "POLAND",
+    "capitale_normalisee": "VARSOVIE"
+  },
+  {
+    "nom": "PORTUGAL",
+    "capitale": "LISBONNE",
+    "code": "pt",
+    "nom_normalise": "PORTUGAL",
+    "capitale_normalisee": "LISBONNE"
+  },
+  {
+    "nom": "QATAR",
+    "capitale": "DOHA",
+    "code": "qa",
+    "nom_normalise": "QATAR",
+    "capitale_normalisee": "DOHA"
+  },
+  {
+    "nom": "ROMANIA",
+    "capitale": "BUCAREST",
+    "code": "ro",
+    "nom_normalise": "ROMANIA",
+    "capitale_normalisee": "BUCAREST"
+  },
+  {
+    "nom": "RUSSIA",
+    "capitale": "MOSCOU",
+    "code": "ru",
+    "nom_normalise": "RUSSIA",
+    "capitale_normalisee": "MOSCOU"
+  },
+  {
+    "nom": "RWANDA",
+    "capitale": "KIGALI",
+    "code": "rw",
+    "nom_normalise": "RWANDA",
+    "capitale_normalisee": "KIGALI"
+  },
+  {
+    "nom": "SAINT KITTS AND NEVIS",
+    "capitale": "BASSETERRE",
+    "code": "kn",
+    "nom_normalise": "SAINT KITTS AND NEVIS",
+    "capitale_normalisee": "BASSETERRE"
+  },
+  {
+    "nom": "SAINT LUCIA",
+    "capitale": "CASTRIES",
+    "code": "lc",
+    "nom_normalise": "SAINT LUCIA",
+    "capitale_normalisee": "CASTRIES"
+  },
+  {
+    "nom": "SAINT VINCENT AND THE GRENADINES",
+    "capitale": "KINGSTOWN",
+    "code": "vc",
+    "nom_normalise": "SAINT VINCENT AND THE GRENADINES",
+    "capitale_normalisee": "KINGSTOWN"
+  },
+  {
+    "nom": "SAMOA",
+    "capitale": "APIA",
+    "code": "ws",
+    "nom_normalise": "SAMOA",
+    "capitale_normalisee": "APIA"
+  },
+  {
+    "nom": "SAN MARINO",
+    "capitale": "SAINT-MARIN",
+    "code": "sm",
+    "nom_normalise": "SAN MARINO",
+    "capitale_normalisee": "SAINT-MARIN"
+  },
+  {
+    "nom": "SAO TOME AND PRINCIPE",
+    "capitale": "SÃO TOMÉ",
+    "code": "st",
+    "nom_normalise": "SAO TOME AND PRINCIPE",
+    "capitale_normalisee": "SAO TOME"
+  },
+  {
+    "nom": "SAUDI ARABIA",
+    "capitale": "RIYAD",
+    "code": "sa",
+    "nom_normalise": "SAUDI ARABIA",
+    "capitale_normalisee": "RIYAD"
+  },
+  {
+    "nom": "SENEGAL",
+    "capitale": "DAKAR",
+    "code": "sn",
+    "nom_normalise": "SENEGAL",
+    "capitale_normalisee": "DAKAR"
+  },
+  {
+    "nom": "SERBIA",
+    "capitale": "BELGRADE",
+    "code": "rs",
+    "nom_normalise": "SERBIA",
+    "capitale_normalisee": "BELGRADE"
+  },
+  {
+    "nom": "SEYCHELLES",
+    "capitale": "VICTORIA",
+    "code": "sc",
+    "nom_normalise": "SEYCHELLES",
+    "capitale_normalisee": "VICTORIA"
+  },
+  {
+    "nom": "SIERRA LEONE",
+    "capitale": "FREETOWN",
+    "code": "sl",
+    "nom_normalise": "SIERRA LEONE",
+    "capitale_normalisee": "FREETOWN"
+  },
+  {
+    "nom": "SINGAPORE",
+    "capitale": "SINGAPOUR",
+    "code": "sg",
+    "nom_normalise": "SINGAPORE",
+    "capitale_normalisee": "SINGAPOUR"
+  },
+  {
+    "nom": "SLOVAKIA",
+    "capitale": "BRATISLAVA",
+    "code": "sk",
+    "nom_normalise": "SLOVAKIA",
+    "capitale_normalisee": "BRATISLAVA"
+  },
+  {
+    "nom": "SLOVENIA",
+    "capitale": "LJUBLJANA",
+    "code": "si",
+    "nom_normalise": "SLOVENIA",
+    "capitale_normalisee": "LJUBLJANA"
+  },
+  {
+    "nom": "SOLOMON ISLANDS",
+    "capitale": "HONIARA",
+    "code": "sb",
+    "nom_normalise": "SOLOMON ISLANDS",
+    "capitale_normalisee": "HONIARA"
+  },
+  {
+    "nom": "SOMALIA",
+    "capitale": "MOGADISCIO",
+    "code": "so",
+    "nom_normalise": "SOMALIA",
+    "capitale_normalisee": "MOGADISCIO"
+  },
+  {
+    "nom": "SOUTH AFRICA",
+    "capitale": "PRETORIA",
+    "code": "za",
+    "nom_normalise": "SOUTH AFRICA",
+    "capitale_normalisee": "PRETORIA"
+  },
+  {
+    "nom": "SOUTH KOREA",
+    "capitale": "SÉOUL",
+    "code": "kr",
+    "nom_normalise": "SOUTH KOREA",
+    "capitale_normalisee": "SEOUL"
+  },
+  {
+    "nom": "SOUTH SUDAN",
+    "capitale": "DJOUBA",
+    "code": "ss",
+    "nom_normalise": "SOUTH SUDAN",
+    "capitale_normalisee": "DJOUBA"
+  },
+  {
+    "nom": "SPAIN",
+    "capitale": "MADRID",
+    "code": "es",
+    "nom_normalise": "SPAIN",
+    "capitale_normalisee": "MADRID"
+  },
+  {
+    "nom": "SRI LANKA",
+    "capitale": "COLOMBO",
+    "code": "lk",
+    "nom_normalise": "SRI LANKA",
+    "capitale_normalisee": "COLOMBO"
+  },
+  {
+    "nom": "SUDAN",
+    "capitale": "KHARTOUM",
+    "code": "sd",
+    "nom_normalise": "SUDAN",
+    "capitale_normalisee": "KHARTOUM"
+  },
+  {
+    "nom": "SURINAME",
+    "capitale": "PARAMARIBO",
+    "code": "sr",
+    "nom_normalise": "SURINAME",
+    "capitale_normalisee": "PARAMARIBO"
+  },
+  {
+    "nom": "SWEDEN",
+    "capitale": "STOCKHOLM",
+    "code": "se",
+    "nom_normalise": "SWEDEN",
+    "capitale_normalisee": "STOCKHOLM"
+  },
+  {
+    "nom": "SWITZERLAND",
+    "capitale": "BERNE",
+    "code": "ch",
+    "nom_normalise": "SWITZERLAND",
+    "capitale_normalisee": "BERNE"
+  },
+  {
+    "nom": "SYRIA",
+    "capitale": "DAMAS",
+    "code": "sy",
+    "nom_normalise": "SYRIA",
+    "capitale_normalisee": "DAMAS"
+  },
+  {
+    "nom": "TAJIKISTAN",
+    "capitale": "DOUCHANBÉ",
+    "code": "tj",
+    "nom_normalise": "TAJIKISTAN",
+    "capitale_normalisee": "DOUCHANBE"
+  },
+  {
+    "nom": "TANZANIA",
+    "capitale": "DODOMA",
+    "code": "tz",
+    "nom_normalise": "TANZANIA",
+    "capitale_normalisee": "DODOMA"
+  },
+  {
+    "nom": "THAILAND",
+    "capitale": "BANGKOK",
+    "code": "th",
+    "nom_normalise": "THAILAND",
+    "capitale_normalisee": "BANGKOK"
+  },
+  {
+    "nom": "TOGO",
+    "capitale": "LOMÉ",
+    "code": "tg",
+    "nom_normalise": "TOGO",
+    "capitale_normalisee": "LOME"
+  },
+  {
+    "nom": "TONGA",
+    "capitale": "NUKU'ALOFA",
+    "code": "to",
+    "nom_normalise": "TONGA",
+    "capitale_normalisee": "NUKU'ALOFA"
+  },
+  {
+    "nom": "TRINIDAD AND TOBAGO",
+    "capitale": "PORT D'ESPAGNE",
+    "code": "tt",
+    "nom_normalise": "TRINIDAD AND TOBAGO",
+    "capitale_normalisee": "PORT D'ESPAGNE"
+  },
+  {
+    "nom": "TUNISIA",
+    "capitale": "TUNIS",
+    "code": "tn",
+    "nom_normalise": "TUNISIA",
+    "capitale_normalisee": "TUNIS"
+  },
+  {
+    "nom": "TURKEY",
+    "capitale": "ANKARA",
+    "code": "tr",
+    "nom_normalise": "TURKEY",
+    "capitale_normalisee": "ANKARA"
+  },
+  {
+    "nom": "TURKMENISTAN",
+    "capitale": "ACHGABAT",
+    "code": "tm",
+    "nom_normalise": "TURKMENISTAN",
+    "capitale_normalisee": "ACHGABAT"
+  },
+  {
+    "nom": "TUVALU",
+    "capitale": "FUNAFUTI",
+    "code": "tv",
+    "nom_normalise": "TUVALU",
+    "capitale_normalisee": "FUNAFUTI"
+  },
+  {
+    "nom": "UGANDA",
+    "capitale": "KAMPALA",
+    "code": "ug",
+    "nom_normalise": "UGANDA",
+    "capitale_normalisee": "KAMPALA"
+  },
+  {
+    "nom": "UKRAINE",
+    "capitale": "KIEV",
+    "code": "ua",
+    "nom_normalise": "UKRAINE",
+    "capitale_normalisee": "KIEV"
+  },
+  {
+    "nom": "UNITED ARAB EMIRATES",
+    "capitale": "ABOU DABI",
+    "code": "ae",
+    "nom_normalise": "UNITED ARAB EMIRATES",
+    "capitale_normalisee": "ABOU DABI"
+  },
+  {
+    "nom": "UNITED KINGDOM",
+    "capitale": "LONDRES",
+    "code": "gb",
+    "nom_normalise": "UNITED KINGDOM",
+    "capitale_normalisee": "LONDRES"
+  },
+  {
+    "nom": "URUGUAY",
+    "capitale": "MONTEVIDEO",
+    "code": "uy",
+    "nom_normalise": "URUGUAY",
+    "capitale_normalisee": "MONTEVIDEO"
+  },
+  {
+    "nom": "UZBEKISTAN",
+    "capitale": "TACHKENT",
+    "code": "uz",
+    "nom_normalise": "UZBEKISTAN",
+    "capitale_normalisee": "TACHKENT"
+  },
+  {
+    "nom": "VANUATU",
+    "capitale": "PORT-VILA",
+    "code": "vu",
+    "nom_normalise": "VANUATU",
+    "capitale_normalisee": "PORT-VILA"
+  },
+  {
+    "nom": "VATICAN",
+    "capitale": "VATICAN",
+    "code": "va",
+    "nom_normalise": "VATICAN",
+    "capitale_normalisee": "VATICAN"
+  },
+  {
+    "nom": "VENEZUELA",
+    "capitale": "CARACAS",
+    "code": "ve",
+    "nom_normalise": "VENEZUELA",
+    "capitale_normalisee": "CARACAS"
+  },
+  {
+    "nom": "VIETNAM",
+    "capitale": "HANOÏ",
+    "code": "vn",
+    "nom_normalise": "VIETNAM",
+    "capitale_normalisee": "HANOI"
+  },
+  {
+    "nom": "YEMEN",
+    "capitale": "SANAA",
+    "code": "ye",
+    "nom_normalise": "YEMEN",
+    "capitale_normalisee": "SANAA"
+  },
+  {
+    "nom": "ZAMBIA",
+    "capitale": "LUSAKA",
+    "code": "zm",
+    "nom_normalise": "ZAMBIA",
+    "capitale_normalisee": "LUSAKA"
+  },
+  {
+    "nom": "ZIMBABWE",
+    "capitale": "HARARE",
+    "code": "zw",
+    "nom_normalise": "ZIMBABWE",
+    "capitale_normalisee": "HARARE"
+  }
+]
