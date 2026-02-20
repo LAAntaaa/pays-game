@@ -52,8 +52,8 @@ Window.size = (390, 844)
 # ──────────────────────────────────────────────────────────────
 
 # ← Changer selon ton hébergement
-SERVEUR_WS   = "ws://localhost:8000"
-SERVEUR_HTTP = "http://localhost:8000"
+SERVEUR_WS   = "wss://pays-game.onrender.com"
+SERVEUR_HTTP = "https://pays-game.onrender.com"
 
 COULEUR_FOND     = get_color_from_hex("#0d0f14")
 COULEUR_OCEAN    = get_color_from_hex("#0a1628")
