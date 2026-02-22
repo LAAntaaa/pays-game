@@ -1,0 +1,3488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LE PAYS FATAL 🌍</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════════════
+   VARIABLES & RESET
+══════════════════════════════════════════════════ */
+:root {
+  --bg:        #0a1628;
+  --bg2:       #0d1e35;
+  --surface:   #112240;
+  --surface2:  #162d4a;
+  --border:    rgba(255,255,255,0.07);
+  --border-hi: rgba(0,210,180,0.5);
+
+  --teal:      #00d4b4;
+  --teal-glow: rgba(0,212,180,0.15);
+  --amber:     #f5a623;
+  --amber-dim: rgba(245,166,35,0.15);
+  --crimson:   #ff4757;
+  --gold:      #f5a623;
+  --muted:     rgba(180,210,240,0.45);
+  --paper:     #c8dff0;
+
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--paper);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  overflow-x: hidden;
+}
+
+/* Fond — dégradé profond + vignette */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 100% 70% at 50% -10%, rgba(0,100,160,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 80% 100%, rgba(0,50,100,0.3) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Grille subtile */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,180,160,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,180,160,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   UTILITAIRES
+══════════════════════════════════════════════════ */
+.hidden { display: none !important; }
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: all .18s ease;
+}
+
+input, select {
+  font-family: 'Space Grotesk', sans-serif;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--paper);
+  border-radius: var(--r-sm);
+  padding: 13px 16px;
+  outline: none;
+  font-size: 15px;
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+input:focus, select:focus {
+  border-color: var(--teal);
+  background: rgba(0,212,180,0.05);
+  box-shadow: 0 0 0 3px rgba(0,212,180,0.1);
+}
+input::placeholder { color: var(--muted); }
+select option { background: var(--surface2); }
+
+/* ══════════════════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════════════════ */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-y: auto;
+  padding: 24px 16px 56px;
+  z-index: 1;
+  min-height: 100%;
+}
+
+#screen-accueil { justify-content: center; }
+
+@media (max-height: 700px) {
+  #screen-accueil { justify-content: flex-start; padding-top: 16px; }
+  .logo-wrap { margin-bottom: 14px; }
+}
+
+/* ══════════════════════════════════════════════════
+   LOGO
+══════════════════════════════════════════════════ */
+.logo-wrap {
+  text-align: center;
+  margin-bottom: 32px;
+  animation: floatIn .7s cubic-bezier(.16,1,.3,1) both;
+}
+.logo-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--teal);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  opacity: 0.85;
+}
+.logo-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 13vw, 86px);
+  line-height: .9;
+  color: var(--amber);
+  letter-spacing: 3px;
+  text-shadow: 0 0 40px rgba(245,166,35,0.4), 0 2px 0 rgba(0,0,0,0.5);
+}
+.logo-globe {
+  font-size: 40px;
+  display: inline-block;
+  margin-bottom: 8px;
+  animation: spin-slow 24s linear infinite;
+}
+
+/* ══════════════════════════════════════════════════
+   CARD
+══════════════════════════════════════════════════ */
+.card {
+  background: rgba(13,30,53,0.85);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-xl);
+  padding: clamp(20px, 5vw, 32px);
+  width: 100%;
+  max-width: 400px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 24px 64px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  animation: floatIn .5s .08s cubic-bezier(.16,1,.3,1) both;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.form-group label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--teal);
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+.form-group input, .form-group select { width: 100%; }
+
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+.toggle-wrap span { font-size: 13px; color: rgba(200,223,240,0.65); }
+.toggle { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.08);
+  border-radius: 26px;
+  cursor: pointer;
+  transition: .25s;
+  border: 1px solid var(--border);
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  left: 3px; top: 3px;
+  width: 18px; height: 18px;
+  background: var(--paper);
+  border-radius: 50%;
+  transition: .25s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+.toggle input:checked + .toggle-slider { background: var(--teal); border-color: var(--teal); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(22px); background: #041018; }
+
+.separator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+.separator::before, .separator::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ══════════════════════════════════════════════════
+   BOUTONS
+══════════════════════════════════════════════════ */
+.btn {
+  width: 100%;
+  padding: 15px 20px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.btn-primary {
+  background: var(--teal);
+  color: #041018;
+  box-shadow: 0 4px 24px rgba(0,212,180,0.35);
+  font-weight: 700;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,212,180,0.5); }
+.btn-primary:active { transform: translateY(1px); box-shadow: 0 2px 12px rgba(0,212,180,0.3); }
+.btn-primary:disabled { opacity: 0.5; transform: none; cursor: wait; }
+
+.btn-secondary {
+  background: rgba(255,255,255,0.05);
+  color: var(--paper);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.2); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--teal);
+  padding: 10px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: 'DM Mono', monospace;
+}
+.btn-ghost:hover { color: var(--amber); }
+
+/* ══════════════════════════════════════════════════
+   WIZARD
+══════════════════════════════════════════════════ */
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.step-header span {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--amber);
+  flex: 1;
+}
+.btn-retour {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  transition: all .15s;
+  white-space: nowrap;
+  letter-spacing: 1px;
+}
+.btn-retour:hover { color: var(--paper); border-color: rgba(255,255,255,0.25); }
+
+/* ══════════════════════════════════════════════════
+   ROOMS LIST
+══════════════════════════════════════════════════ */
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+.room-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all .15s;
+}
+.room-item:hover { background: var(--teal-glow); border-color: var(--border-hi); }
+.room-item .room-id { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--amber); letter-spacing: 3px; }
+.room-item .room-info { font-size: 11px; color: var(--muted); }
+
+/* ══════════════════════════════════════════════════
+   LOBBY
+══════════════════════════════════════════════════ */
+#screen-lobby { gap: 14px; justify-content: flex-start; padding-top: 24px; }
+
+.lobby-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 480px;
+}
+.lobby-header h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: var(--amber);
+  flex: 1;
+  text-align: center;
+}
+.room-badge {
+  display: inline-flex;
+  align-items: center;
+  background: var(--amber-dim);
+  border: 1px solid rgba(245,166,35,0.3);
+  border-radius: 30px;
+  padding: 6px 20px;
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  color: var(--amber);
+  letter-spacing: 6px;
+}
+.link-share {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  cursor: pointer;
+  width: 100%;
+  max-width: 480px;
+  text-align: left;
+  transition: all .15s;
+  letter-spacing: 1px;
+}
+.link-share:hover { border-color: var(--teal); color: var(--teal); }
+.link-share .link-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
+}
+.player-slot {
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.07);
+  border-radius: var(--r-md);
+  padding: 16px 10px;
+  text-align: center;
+  transition: all .3s;
+}
+.player-slot.filled {
+  border: 1px solid rgba(0,212,180,0.2);
+  background: rgba(0,212,180,0.04);
+  animation: popIn .3s cubic-bezier(.16,1,.3,1);
+}
+.player-slot .slot-avatar { font-size: 28px; margin-bottom: 6px; }
+.player-slot .slot-name { font-size: 13px; font-weight: 600; color: var(--paper); }
+.player-slot .slot-tag { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--teal); letter-spacing: 1.5px; margin-top: 3px; }
+
+.lobby-actions { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 480px; }
+
+/* ══════════════════════════════════════════════════
+   ÉCRAN JEU — BARRE SCORES COMPACTE
+══════════════════════════════════════════════════ */
+#screen-jeu {
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════
+   TOPBAR JEU — 3 zones : [Joueur] [⏳Chrono] [Joueur]
+══════════════════════════════════════════════════ */
+.game-topbar {
+  width: 100%;
+  background: rgba(8,18,32,0.97);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Rangée principale — 3 colonnes fixes */
+.topbar-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 8px 12px;
+  min-height: 58px;
+  gap: 8px;
+}
+
+/* Rangée bonus pour 3+ joueurs */
+.topbar-row-extra {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 12px 8px;
+  flex-wrap: wrap;
+}
+
+/* Carte joueur */
+.topbar-player {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  transition: all .3s;
+  min-width: 0;
+}
+.topbar-player.right {
+  align-items: flex-end;
+}
+.topbar-player.active {
+  background: rgba(0,212,180,0.06);
+  border-color: rgba(0,212,180,0.18);
+}
+
+.tp-name {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(200,223,240,0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+}
+.topbar-player.active .tp-name { color: var(--teal); }
+
+/* Dots de vie */
+.tp-dots {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  max-width: 110px;
+}
+.topbar-player.right .tp-dots { justify-content: flex-end; }
+
+.tp-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--crimson);
+  box-shadow: 0 0 5px rgba(255,71,87,0.45);
+  transition: all .3s;
+  flex-shrink: 0;
+}
+.tp-dot.lost {
+  background: rgba(255,255,255,0.08);
+  box-shadow: none;
+}
+
+/* Pill chrono — centre absolu */
+.chrono-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.28);
+  border-radius: 14px;
+  padding: 7px 18px;
+  min-width: 68px;
+  flex-shrink: 0;
+  transition: all .3s;
+}
+.chrono-pill.urgent {
+  background: rgba(255,71,87,0.12);
+  border-color: rgba(255,71,87,0.45);
+  animation: urgentPulse .6s ease infinite alternate;
+}
+.chrono-pill .hourglass-icon {
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0.7;
+}
+.chrono-pill.urgent .hourglass-icon { animation: spin-slow 0.8s linear infinite; }
+.chrono-pill .chrono-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--amber);
+  line-height: 1;
+}
+.chrono-pill.urgent .chrono-val { color: var(--crimson); }
+
+/* Barre de progression chrono — fine ligne sous topbar */
+.chrono-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.04);
+  overflow: hidden;
+}
+.chrono-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--amber));
+  width: 100%;
+  transition: width 1s linear, background .5s;
+}
+.chrono-fill.urgent { background: linear-gradient(90deg, var(--amber), var(--crimson)); }
+
+/* Zone jeu */
+.game-main {
+  flex: 1;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px 16px;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+/* Séquence — lettres avec tirets style image */
+.letters-display {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.letters-sequence {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 10vw, 68px);
+  letter-spacing: 14px;
+  color: var(--teal);
+  text-shadow: 0 0 30px rgba(0,212,180,0.4);
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .25s;
+  /* Underline style */
+  border-bottom: 2px solid rgba(0,212,180,0.2);
+  padding-bottom: 8px;
+  width: 100%;
+}
+.letters-sequence:empty::before { content: '…'; opacity: 0.3; }
+.letters-sequence.invalid {
+  color: var(--crimson);
+  text-shadow: 0 0 30px rgba(255,71,87,0.4);
+  border-bottom-color: var(--crimson);
+  animation: shake .3s ease;
+}
+.letters-sequence.complete {
+  color: var(--amber);
+  text-shadow: 0 0 30px rgba(245,166,35,0.4);
+  border-bottom-color: var(--amber);
+}
+
+.turn-indicator {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  color: var(--teal);
+  text-transform: uppercase;
+  animation: pulse 2s infinite;
+}
+
+.possibilities-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+/* Sablier décoratif */
+.hourglass-display {
+  width: 60px;
+  height: 80px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;
+  filter: drop-shadow(0 0 16px rgba(245,166,35,0.5));
+  animation: hourglassFloat 3s ease-in-out infinite;
+}
+
+/* Drapeaux */
+.flags-section {
+  width: 100%;
+}
+.flags-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.flags-scroll {
+  width: 100%;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+.flags-scroll::-webkit-scrollbar { height: 2px; }
+.flags-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+.flags-inner {
+  display: flex;
+  gap: 10px;
+  padding: 0 4px;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+}
+.flag-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  animation: popIn .3s cubic-bezier(.16,1,.3,1);
+}
+.flag-item img {
+  width: 48px; height: 32px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.flag-item .flag-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px;
+  color: var(--muted);
+  max-width: 48px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════
+   CLAVIER — style image : touches rondes/carrées
+══════════════════════════════════════════════════ */
+.keyboard-wrap { width: 100%; }
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.kb-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 6px;
+}
+.kb-row .key {
+  width: 36px;
+  height: 36px;
+  aspect-ratio: unset;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.key {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--paper);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all .1s;
+  position: relative;
+  overflow: hidden;
+  /* Légère brillance en bas comme des touches physiques */
+  box-shadow: 0 3px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.key:hover:not(:disabled) {
+  background: rgba(0,212,180,0.15);
+  border-color: rgba(0,212,180,0.5);
+  color: var(--teal);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 rgba(0,0,0,0.4), 0 0 12px rgba(0,212,180,0.2);
+}
+.key:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+}
+.key:disabled { opacity: 0.15; cursor: not-allowed; box-shadow: none; }
+
+
+
+/* Bouton langue au chat */
+.btn-langue {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: rgba(255,71,87,0.08);
+  border: 1px solid rgba(255,71,87,0.2);
+  color: #ff6b78;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all .2s;
+}
+.btn-langue:hover:not(:disabled) {
+  background: rgba(255,71,87,0.15);
+  border-color: rgba(255,71,87,0.5);
+  box-shadow: 0 0 20px rgba(255,71,87,0.15);
+}
+.btn-langue:disabled { opacity: 0.2; cursor: not-allowed; }
+
+/* ══════════════════════════════════════════════════
+   CHAT
+══════════════════════════════════════════════════ */
+.chat-panel {
+  position: fixed;
+  right: 0; top: 0; bottom: 0;
+  width: 260px;
+  background: rgba(8,18,32,0.98);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.16,1,.3,1);
+  z-index: 20;
+  backdrop-filter: blur(24px);
+}
+.chat-panel.open { transform: translateX(0); }
+.chat-toggle {
+  position: fixed;
+  right: 16px; bottom: 80px;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--paper);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 21;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+.chat-toggle:hover { background: var(--teal-glow); border-color: var(--border-hi); }
+.chat-toggle .notif {
+  position: absolute;
+  top: -2px; right: -2px;
+  width: 12px; height: 12px;
+  background: var(--crimson);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  display: none;
+}
+.chat-toggle .notif.show { display: block; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.chat-messages::-webkit-scrollbar { width: 2px; }
+.chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); }
+.chat-msg { font-size: 13px; line-height: 1.4; }
+.chat-msg .msg-author { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--teal); margin-bottom: 2px; letter-spacing: 1px; }
+.chat-msg.system .msg-text { color: var(--amber); font-style: italic; font-size: 12px; }
+.chat-msg.moi { text-align: right; }
+.chat-msg.moi .msg-author { color: var(--teal); }
+.chat-msg.moi .msg-text { background: rgba(0,212,180,0.08); border-radius: 8px; padding: 4px 8px; display: inline-block; }
+.chat-input-wrap { padding: 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+.chat-input-wrap input { flex: 1; font-size: 13px; padding: 8px 10px; }
+.chat-input-wrap button { background: var(--teal); color: #041018; border-radius: var(--r-sm); padding: 8px 12px; font-size: 12px; font-weight: 700; }
+
+/* ══════════════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.8);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  animation: fadeIn .2s ease;
+}
+.modal-overlay.hidden { display: none; }
+.modal-box {
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--r-xl);
+  padding: 36px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 40px 100px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,0.07);
+  animation: floatIn .3s cubic-bezier(.16,1,.3,1);
+}
+.modal-emoji { font-size: 52px; margin-bottom: 14px; display: block; }
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; margin-bottom: 8px; color: var(--amber); }
+.modal-text { color: rgba(200,223,240,0.65); font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+.modal-input {
+  width: 100%;
+  font-size: 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  text-align: center;
+  padding: 14px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  border-radius: var(--r-md);
+}
+.modal-actions { display: flex; flex-direction: column; gap: 10px; }
+.verdict-valid   { color: var(--teal); }
+.verdict-invalid { color: var(--crimson); }
+
+/* ══════════════════════════════════════════════════
+   FIN DE PARTIE
+══════════════════════════════════════════════════ */
+#screen-fin { gap: 24px; }
+.winner-display { text-align: center; animation: floatIn .6s cubic-bezier(.16,1,.3,1) both; }
+.winner-crown { font-size: 80px; animation: bounce 1s ease infinite alternate; display: block; margin-bottom: 8px; }
+.winner-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  letter-spacing: 4px;
+  color: var(--amber);
+  text-shadow: 0 0 40px rgba(245,166,35,0.5);
+  margin: 8px 0;
+}
+.winner-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--teal);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+}
+.stat-cell {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 18px 10px;
+  text-align: center;
+}
+.stat-cell .stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  color: var(--teal);
+  letter-spacing: 2px;
+}
+.stat-cell .stat-lbl {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ══════════════════════════════════════════════════
+   TOASTS
+══════════════════════════════════════════════════ */
+#toast-container {
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 200;
+  pointer-events: none;
+  width: min(360px, 90vw);
+}
+.toast {
+  background: rgba(13,30,53,0.98);
+  border-radius: var(--r-md);
+  padding: 11px 16px;
+  font-size: 13px;
+  border-left: 3px solid var(--teal);
+  backdrop-filter: blur(20px);
+  animation: toastIn .25s cubic-bezier(.16,1,.3,1);
+  box-shadow: 0 8px 28px rgba(0,0,0,.5);
+  font-family: 'Space Grotesk', sans-serif;
+}
+.toast.warn  { border-color: var(--amber); }
+.toast.error { border-color: var(--crimson); }
+.toast.exit  { animation: toastOut .25s ease forwards; }
+
+/* ══════════════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════════════ */
+@keyframes floatIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-8px); }
+  40%,80% { transform: translateX(8px); }
+}
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; } to { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes hourglassFloat {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes urgentPulse {
+  from { box-shadow: 0 0 0 rgba(255,71,87,0); }
+  to   { box-shadow: 0 0 16px rgba(255,71,87,0.4); }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  #screen-jeu { max-width: 480px; margin: 0 auto; }
+  #screen-lobby { align-items: center; }
+}
+@media (max-width: 360px) {
+  .keyboard { gap: 4px; }
+  .key { font-size: 12px; }
+  .game-main { padding: 8px; gap: 10px; }
+}
+@media (max-height: 600px) {
+  .game-main { padding: 8px; gap: 6px; }
+  .hourglass-display { display: none; }
+  .flags-section { display: none; }
+}
+@media (max-width: 400px) {
+  .row-2 { flex-direction: column; }
+  .card { border-radius: var(--r-lg); }
+}
+
+/* ── Tutoriel ── */
+.tuto-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); transition: background .2s;
+}
+.tuto-dot.active { background: var(--teal); }
+
+</style>
+</head>
+<body>
+<!-- Panneau debug — Ctrl+D pour afficher -->
+<button onclick="afficherTuto()"
+  style="position:fixed;bottom:12px;left:12px;background:rgba(255,255,255,0.05);
+         border:1px solid rgba(255,255,255,0.1);color:var(--muted);border-radius:8px;
+         padding:6px 12px;font-size:11px;cursor:pointer;z-index:100;font-family:'DM Mono',monospace">
+  ? Règles
+</button>
+<div id="debug-panel" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#000d;color:#0f0;font-family:monospace;padding:6px;z-index:9999;max-height:180px;overflow-y:auto"></div>
+
+<!-- ═══════════════════════════════════════════════
+     ÉCRAN 1 — ACCUEIL (wizard 3 étapes)
+═══════════════════════════════════════════════ -->
+<div id="screen-accueil" class="screen">
+  <div class="logo-wrap">
+    <div class="logo-sub">Je donne ma langue au chat</div>
+    <span class="logo-globe">🌍</span>
+    <div class="logo-title">LE PAYS<br>FATAL</div>
+  </div>
+
+  <!-- ÉTAPE 0 — Choix Solo ou Multijoueur -->
+  <div id="step-choix" class="card" style="text-align:center">
+    <p style="color:var(--muted);font-size:13px;margin-bottom:20px;font-family:'DM Mono',monospace;letter-spacing:1px">CHOISIR UN MODE</p>
+    <button class="btn btn-primary" style="font-size:16px;height:60px" onclick="allerStep('step-solo')">
+      🤖 Solo vs Ordinateur
+    </button>
+    <div class="separator">ou</div>
+    <button class="btn btn-secondary" style="font-size:16px;height:60px" onclick="allerStep('step-multi')">
+      🌐 Multijoueur en ligne
+    </button>
+  </div>
+
+  <!-- ÉTAPE 1 — Solo -->
+  <div id="step-solo" class="card hidden">
+    <div class="step-header">
+      <button class="btn-retour" onclick="allerStep('step-choix')">← Retour</button>
+      <span>Mode Solo</span>
+    </div>
+    <div class="form-group">
+      <label>Ton nom</label>
+      <input id="solo-nom" type="text" placeholder="Ex: Anta" maxlength="20">
+    </div>
+    <div class="row-2">
+      <div class="form-group">
+        <label>Langue</label>
+        <select id="solo-langue">
+          <option value="fr">🇫🇷 Français</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Vies</label>
+        <select id="solo-vies">
+          <option value="5">5 vies</option>
+          <option value="10" selected>10 vies</option>
+          <option value="15">15 vies</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Chrono</label>
+      <select id="solo-temps">
+        <option value="10">10 sec</option>
+        <option value="15" selected>15 sec</option>
+        <option value="30">30 sec</option>
+        <option value="60">60 sec</option>
+      </select>
+    </div>
+    <div class="toggle-wrap">
+      <label class="toggle">
+        <input type="checkbox" id="solo-mixte">
+        <span class="toggle-slider"></span>
+      </label>
+      <span>Mode mixte — pays <em>&</em> capitales</span>
+    </div>
+    <div class="form-group">
+      <label>Mode de jeu</label>
+      <select id="solo-mode">
+        <option value="classique" selected>🎯 Classique</option>
+        <option value="blitz">⚡ Blitz — 5 secondes</option>
+        <option value="survie">💀 Survie — 1 vie</option>
+        <option value="acceleration">🔥 Accélération — chrono -1s/tour</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="lancerSolo()">
+      ▶ Jouer
+    </button>
+  </div>
+
+  <!-- ÉTAPE 2 — Choix Créer / Rejoindre -->
+  <div id="step-multi" class="card hidden">
+    <div class="step-header">
+      <button class="btn-retour" onclick="allerStep('step-choix')">← Retour</button>
+      <span>Multijoueur</span>
+    </div>
+    <button class="btn btn-primary" style="height:56px" onclick="allerStep('step-creer')">
+      🗺️ Créer une partie
+    </button>
+    <div class="separator">ou</div>
+    <button class="btn btn-secondary" style="height:56px" onclick="allerStep('step-rejoindre')">
+      🔗 Rejoindre avec un code
+    </button>
+    <div style="margin-top:12px">
+      <button class="btn btn-ghost" onclick="rafraichirRooms()">⟳ Parties publiques disponibles</button>
+      <div id="rooms-list" class="rooms-list"></div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 3a — Créer -->
+  <div id="step-creer" class="card hidden">
+    <div class="step-header">
+      <button class="btn-retour" onclick="allerStep('step-multi')">← Retour</button>
+      <span>Créer une partie</span>
+    </div>
+    <div class="form-group">
+      <label>Ton nom</label>
+      <input id="creer-nom" type="text" placeholder="Ex: Anta" maxlength="20">
+    </div>
+    <div class="row-2">
+      <div class="form-group">
+        <label>Langue</label>
+        <select id="creer-langue">
+          <option value="fr">🇫🇷 Français</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Vies</label>
+        <select id="creer-vies">
+          <option value="5">5 vies</option>
+          <option value="10" selected>10 vies</option>
+          <option value="15">15 vies</option>
+        </select>
+      </div>
+    </div>
+    <div class="row-2">
+      <div class="form-group">
+        <label>Chrono</label>
+        <select id="creer-temps">
+          <option value="10">10 sec</option>
+          <option value="15" selected>15 sec</option>
+          <option value="30">30 sec</option>
+          <option value="60">60 sec</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Joueurs max</label>
+        <select id="creer-max">
+          <option value="2">2</option>
+          <option value="4" selected>4</option>
+          <option value="8">8</option>
+        </select>
+      </div>
+    </div>
+    <div class="toggle-wrap">
+      <label class="toggle">
+        <input type="checkbox" id="creer-mixte">
+        <span class="toggle-slider"></span>
+      </label>
+      <span>Mode mixte — pays <em>&</em> capitales</span>
+    </div>
+    <div class="form-group">
+      <label>Mode de jeu</label>
+      <select id="creer-mode">
+        <option value="classique" selected>🎯 Classique</option>
+        <option value="blitz">⚡ Blitz — 5 secondes</option>
+        <option value="survie">💀 Survie — 1 vie</option>
+        <option value="acceleration">🔥 Accélération — chrono -1s/tour</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="creerPartie()" id="btn-creer">
+      🗺️ Créer la partie
+    </button>
+  </div>
+
+  <!-- ÉTAPE 3b — Rejoindre -->
+  <div id="step-rejoindre" class="card hidden">
+    <div class="step-header">
+      <button class="btn-retour" onclick="allerStep('step-multi')">← Retour</button>
+      <span>Rejoindre</span>
+    </div>
+    <div class="form-group">
+      <label>Ton nom</label>
+      <input id="rejoindre-nom" type="text" placeholder="Ex: Fatou" maxlength="20">
+    </div>
+    <div class="form-group">
+      <label>Code de la salle</label>
+      <input id="rejoindre-code" type="text" placeholder="Ex: ABCDEF" maxlength="6"
+             style="text-transform:uppercase;letter-spacing:6px;font-size:22px;text-align:center"
+             oninput="this.value=this.value.toUpperCase()"
+             onkeydown="if(event.key==='Enter')rejoindreParCode()">
+    </div>
+    <button class="btn btn-primary" onclick="rejoindreParCode()">
+      Rejoindre →
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ÉCRAN 2 — LOBBY
+═══════════════════════════════════════════════ -->
+<div id="screen-lobby" class="screen hidden">
+  <div class="lobby-header">
+    <button onclick="retourAccueil()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1" title="Retour à l'accueil">←</button>
+    <h2>Salle d'attente</h2>
+    <div class="room-badge" id="lobby-code">——</div>
+  </div>
+
+  <button class="link-share" onclick="copierLien()">
+    <span>🔗</span>
+    <span class="link-text" id="lien-partage">Chargement…</span>
+    <span style="color:var(--teal);font-size:11px">COPIER</span>
+  </button>
+
+  <div id="players-grid" class="players-grid"></div>
+
+  <div class="lobby-actions" id="lobby-actions">
+    <!-- Contenu généré par mettreAJourBoutonsLobby() selon estCreateur -->
+    <button class="btn btn-primary" id="btn-demarrer" onclick="demarrerPartie()" style="display:none">
+      ▶ Lancer la partie
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ÉCRAN 3 — JEU
+═══════════════════════════════════════════════ -->
+<div id="screen-jeu" class="screen hidden" style="padding:0">
+
+  <!-- BUG05 FIX — Barre d'actions pause / quitter -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:rgba(10,22,40,.95);border-bottom:1px solid rgba(255,255,255,0.06)">
+    <button onclick="toggleSons()" id="btn-sons"
+      style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--paper);border-radius:8px;padding:6px 10px;font-family:'DM Mono',monospace;font-size:14px;cursor:pointer">🔊</button>
+    <button id="btn-pause" onclick="basculerPause()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--paper);border-radius:8px;padding:6px 14px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all .2s">⏸ Pause</button>
+    <button onclick="confirmerQuitter()" style="background:rgba(230,57,70,0.1);border:1px solid rgba(230,57,70,0.25);color:var(--crimson);border-radius:8px;padding:6px 14px;font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:all .2s">✕ Quitter</button>
+  </div>
+
+  <!-- Topbar : joueur gauche | chrono | joueur droite -->
+  <!-- Badge mode de jeu -->
+  <div id="mode-badge" style="display:none;text-align:center;padding:3px 0;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;background:rgba(245,166,35,0.12);color:var(--amber)"></div>
+  <div class="game-topbar" id="game-topbar">
+    <div class="topbar-row" id="topbar-row">
+      <!-- Généré par mettreAJourScores() -->
+    </div>
+    <div class="topbar-row-extra" id="topbar-row-extra" style="display:none"></div>
+  </div>
+
+  <!-- Barre progression fine -->
+  <div class="chrono-bar">
+    <div class="chrono-fill" id="chrono-fill"></div>
+  </div>
+
+  <!-- Zone principale -->
+  <div class="game-main">
+    <!-- Sablier décoratif -->
+    <div class="hourglass-display" id="hourglass-display">⏳</div>
+
+    <div class="letters-display">
+      <div class="letters-sequence" id="letters-seq">…</div>
+      <div class="turn-indicator" id="turn-indicator">En attente</div>
+      <div class="possibilities-count" id="poss-count"></div>
+    </div>
+
+    <!-- Historique drapeaux -->
+    <div class="flags-section">
+      <div class="flags-label" id="flags-label" style="display:none">Derniers pays</div>
+      <div class="flags-scroll">
+        <div class="flags-inner" id="flags-inner"></div>
+      </div>
+    </div>
+
+    <!-- Clavier -->
+    <div class="keyboard-wrap">
+      <div class="keyboard" id="keyboard"></div>
+    </div>
+
+    <!-- Langue au chat -->
+    <button class="btn-langue" id="btn-langue" onclick="demanderLangueAuChat()">
+      🗣 Donner ma langue au chat
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     ÉCRAN 4 — FIN
+═══════════════════════════════════════════════ -->
+<div id="screen-fin" class="screen hidden">
+  <div class="winner-display">
+    <div class="winner-crown">👑</div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--teal)">LE WINNERRRR 🎉</div>
+    <div class="winner-name" id="winner-name">—</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-cell">
+      <div class="stat-val" id="stat-pays">0</div>
+      <div class="stat-lbl">Pays joués</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val" id="stat-tours">0</div>
+      <div class="stat-lbl">Tours</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-val" id="stat-vies">0</div>
+      <div class="stat-lbl">Vies restantes</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;width:100%;max-width:360px">
+    <button class="btn btn-secondary" style="flex:1" onclick="retourAccueil()">← Accueil</button>
+    <button class="btn btn-primary" style="flex:1" onclick="rejouerMeme()">↺ Rejouer</button>
+  </div>
+
+  <!-- BUG04 FIX — Bouton voir pays joués -->
+  <button onclick="afficherScores()"
+    style="width:100%;max-width:360px;padding:12px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);color:var(--amber);border-radius:10px;cursor:pointer;font-size:14px;font-family:'Space Grotesk',sans-serif">
+    🏆 Meilleurs scores
+  </button>
+  <button class="btn btn-secondary" style="width:100%;max-width:360px" onclick="afficherPaysJoues()">
+    🗺️ Voir les pays joués
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     CHAT
+═══════════════════════════════════════════════ -->
+<button class="chat-toggle hidden" id="chat-toggle-btn" onclick="toggleChat()">
+  💬
+  <span class="notif" id="chat-notif"></span>
+</button>
+
+<div class="chat-panel" id="chat-panel">
+  <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center">
+    <span style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--teal)">CHAT</span>
+    <button onclick="toggleChat()" style="background:none;color:var(--muted);font-size:18px;line-height:1">×</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <!-- Barre d'emojis rapides -->
+  <div id="emoji-bar" style="display:none;flex-wrap:wrap;gap:4px;padding:8px 12px;border-top:1px solid rgba(255,255,255,.07)">
+    <span style="font-size:9px;color:var(--muted);width:100%;font-family:'DM Mono',monospace;letter-spacing:1px">RÉACTION RAPIDE</span>
+  </div>
+  <div class="chat-input-wrap">
+    <input id="chat-input" type="text" placeholder="Message…" maxlength="200"
+      onkeydown="if(event.key==='Enter')envoyerChat()">
+    <button onclick="envoyerEmoji()" title="Emoji" style="font-size:16px">😊</button>
+    <button onclick="envoyerChat()">↑</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     MODAL — LANGUE AU CHAT
+═══════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-langue">
+  <div class="modal-box">
+    <span class="modal-emoji">🗣️</span>
+    <div class="modal-title">Langue au chat !</div>
+    <div class="modal-text" id="modal-langue-text">Quel pays avais-tu en tête ?</div>
+    <!-- Compte à rebours -->
+    <div id="lac-countdown" style="
+      font-family:'Bebas Neue',sans-serif;
+      font-size:42px;
+      color:var(--amber);
+      text-align:center;
+      margin:8px 0;
+      transition:color .3s;
+    ">20</div>
+    <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-bottom:16px">
+      <div id="lac-progress" style="height:100%;background:var(--amber);border-radius:2px;width:100%;transition:width 1s linear"></div>
+    </div>
+    <input class="modal-input" id="modal-langue-input" type="text" placeholder="FRANCE…"
+      onkeydown="if(event.key==='Enter')validerLangueAuChat()">
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="validerLangueAuChat()">Valider</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL — VERDICT -->
+<div class="modal-overlay hidden" id="modal-verdict">
+  <div class="modal-box">
+    <span class="modal-emoji" id="verdict-emoji">⚖️</span>
+    <div class="modal-title" id="verdict-title">Verdict</div>
+    <div class="modal-text" id="verdict-text"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="fermerVerdict()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- BUG05 FIX — MODAL PAUSE -->
+<div class="modal-overlay hidden" id="modal-pause">
+  <div class="modal-box" style="text-align:center">
+    <span class="modal-emoji">⏸</span>
+    <div class="modal-title">Partie en pause</div>
+    <div class="modal-text">Le chrono est arrêté.</div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="reprendreDepuisPause()">▶ Reprendre</button>
+    </div>
+  </div>
+</div>
+
+<!-- BUG05 FIX — MODAL QUITTER -->
+<div class="modal-overlay hidden" id="modal-quitter">
+  <div class="modal-box" style="text-align:center">
+    <span class="modal-emoji">🚪</span>
+    <div class="modal-title">Quitter la partie ?</div>
+    <div class="modal-text">La partie sera abandonnée.</div>
+    <div class="modal-actions" style="flex-direction:row;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="annulerQuitter()">Continuer</button>
+      <button class="btn btn-primary" style="flex:1;background:var(--crimson);color:#fff" onclick="retourAccueil()">Quitter</button>
+    </div>
+  </div>
+</div>
+
+<!-- BUG04 FIX — MODAL PAYS JOUÉS -->
+<div class="modal-overlay hidden" id="modal-pays-joues">
+  <div class="modal-box" style="max-width:460px;text-align:left">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div id="pays-joues-count" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--teal)"></div>
+      <button onclick="document.getElementById('modal-pays-joues').classList.add('hidden')"
+        style="background:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div id="pays-joues-list" style="max-height:340px;overflow-y:auto;padding-right:4px"></div>
+    <div style="margin-top:16px">
+      <button class="btn btn-primary" onclick="document.getElementById('modal-pays-joues').classList.add('hidden')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+// ══════════════════════════════════════════════════
+//  ÉTAT GLOBAL
+// ══════════════════════════════════════════════════
+const STATE = {
+  // Connexion
+  ws: null,
+  serveur: null,           // URL WebSocket du serveur
+  roomId: null,
+  joueurId: crypto.randomUUID(),
+  nom: 'Joueur',
+  estCreateur: false,
+  modeJeu: 'classique',  // classique | blitz | survie | acceleration
+  modeConnecte: false,     // false = mode solo, true = connecté au serveur
+  joueurFautif: null,      // id du joueur qui a posé la séquence courante
+
+  // Partie
+  etat: null,              // snapshot serveur
+  tempsMax: 15,
+  tempsRestant: 15,
+  chronoInterval: null,
+  estMonTour: false,
+  nbTours: 0,
+
+  // Config
+  langue: 'fr',
+  modeMixte: false,
+  paysJouesList: [],   // pays joués en mode connecté (rempli à fin_partie)
+};
+
+// URL du serveur — modifier selon ton hébergement
+// En local : ws://localhost:8000
+// En prod  : wss://ton-app.onrender.com
+const SERVEUR_HTTP = window.location.hostname === 'localhost'
+  ? 'http://localhost:8000'
+  : 'https://pays-game.onrender.com';   // ← À CHANGER EN PROD
+
+const SERVEUR_WS = SERVEUR_HTTP.replace('http', 'ws');
+
+// ══════════════════════════════════════════════════
+//  MODE SOLO (sans serveur) — données locales
+// ══════════════════════════════════════════════════
+let PAYS_LOCAL = null;
+
+async function chargerPaysLocal(langue) {
+  try {
+    const r = await fetch(`pays_${langue}.json`);
+    const pays = await r.json();
+    // Re-normaliser pour garantir cohérence (supprime tirets, espaces, apostrophes)
+    pays.forEach(p => {
+      p.nom_normalise       = normaliser(p.nom_normalise || p.nom || '');
+      p.capitale_normalisee = normaliser(p.capitale_normalisee || p.capitale || '');
+    });
+    pays._langue = langue; // marquer la langue chargée
+    PAYS_LOCAL = pays;
+  } catch {
+    // Fallback minimal
+    PAYS_LOCAL = [
+      { nom: 'FRANCE', capitale: 'PARIS', code: 'fr', nom_normalise: 'FRANCE', capitale_normalisee: 'PARIS' },
+      { nom: 'ALLEMAGNE', capitale: 'BERLIN', code: 'de', nom_normalise: 'ALLEMAGNE', capitale_normalisee: 'BERLIN' },
+      { nom: 'ESPAGNE', capitale: 'MADRID', code: 'es', nom_normalise: 'ESPAGNE', capitale_normalisee: 'MADRID' },
+      { nom: 'ITALIE', capitale: 'ROME', code: 'it', nom_normalise: 'ITALIE', capitale_normalisee: 'ROME' },
+      { nom: 'BELGIQUE', capitale: 'BRUXELLES', code: 'be', nom_normalise: 'BELGIQUE', capitale_normalisee: 'BRUXELLES' },
+      { nom: 'PORTUGAL', capitale: 'LISBONNE', code: 'pt', nom_normalise: 'PORTUGAL', capitale_normalisee: 'LISBONNE' },
+      { nom: 'PAYS-BAS', capitale: 'AMSTERDAM', code: 'nl', nom_normalise: 'PAYS-BAS', capitale_normalisee: 'AMSTERDAM' },
+      { nom: 'SUISSE', capitale: 'BERNE', code: 'ch', nom_normalise: 'SUISSE', capitale_normalisee: 'BERNE' },
+      { nom: 'CANADA', capitale: 'OTTAWA', code: 'ca', nom_normalise: 'CANADA', capitale_normalisee: 'OTTAWA' },
+      { nom: 'CHINE', capitale: 'PÉKIN', code: 'cn', nom_normalise: 'CHINE', capitale_normalisee: 'PEKIN' },
+      { nom: 'JAPON', capitale: 'TOKYO', code: 'jp', nom_normalise: 'JAPON', capitale_normalisee: 'TOKYO' },
+    ];
+    toast('⚠️ Fichier pays non trouvé — mode démo avec pays limités', 'warn');
+  }
+}
+
+function normaliser(s) {
+  return s.toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Z]/g, ''); // BUG02 FIX — supprime espaces, tirets, apostrophes (aligné sur main.py)
+}
+
+function chercherPossibilites(seq) {
+  if (!PAYS_LOCAL || !seq) return PAYS_LOCAL || [];
+  const s = normaliser(seq);
+  return PAYS_LOCAL.filter(p =>
+    p.nom_normalise.startsWith(s) ||
+    (STATE.modeMixte && p.capitale_normalisee.startsWith(s))
+  );
+}
+
+function estComplet(seq) {
+  const s = normaliser(seq);
+  return PAYS_LOCAL?.find(p =>
+    p.nom_normalise === s ||
+    (STATE.modeMixte && p.capitale_normalisee === s)
+  ) || null;
+}
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+function afficherEcran(id) {
+  // Chat visible uniquement en lobby et en jeu
+  const chatBtn = document.getElementById('chat-toggle-btn');
+  if (chatBtn) {
+    if (id === 'screen-lobby' || id === 'screen-jeu') {
+      chatBtn.classList.remove('hidden');
+    } else {
+      chatBtn.classList.add('hidden');
+      // Fermer le panel si ouvert
+      document.getElementById('chat-panel').classList.remove('open');
+    }
+  }
+  ['screen-accueil','screen-lobby','screen-jeu','screen-fin'].forEach(s => {
+    document.getElementById(s).classList.toggle('hidden', s !== id);
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  WIZARD ACCUEIL
+// ══════════════════════════════════════════════════
+const STEPS = ['step-choix','step-solo','step-multi','step-creer','step-rejoindre'];
+
+function allerStep(id) {
+  STEPS.forEach(s => document.getElementById(s)?.classList.add('hidden'));
+  document.getElementById(id)?.classList.remove('hidden');
+  setTimeout(() => {
+    const input = document.getElementById(id)?.querySelector('input[type="text"]');
+    if (input) input.focus();
+  }, 50);
+}
+
+// ── Solo ─────────────────────────────────────────
+function lancerSolo() {
+  const nom    = document.getElementById('solo-nom').value.trim()  || 'Joueur';
+  const langue = document.getElementById('solo-langue').value;
+  STATE.nom       = nom;
+  STATE.langue    = langue;
+  STATE.modeMixte = document.getElementById('solo-mixte').checked;
+  STATE.modeJeu   = document.getElementById('solo-mode')?.value || 'classique';
+
+  // Ajuster config selon le mode
+  let vies = parseInt(document.getElementById('solo-vies').value) || 10;
+  let temps = parseInt(document.getElementById('solo-temps').value) || 15;
+  if (STATE.modeJeu === 'blitz')    { temps = 5; }
+  if (STATE.modeJeu === 'survie')   { vies = 1; }
+  STATE.tempsMax  = temps;
+  SOLO.viesDepart = vies;
+  SOLO.tempsDepart = temps;
+
+  if (!PAYS_LOCAL || PAYS_LOCAL._langue !== langue) {
+    chargerPaysLocal(langue).then(() => lancerModeSolo(vies));
+  } else {
+    lancerModeSolo(vies);
+  }
+}
+
+// ── Créer ────────────────────────────────────────
+async function creerPartie() {
+  const nom    = document.getElementById('creer-nom').value.trim() || 'Joueur';
+  const langue = document.getElementById('creer-langue').value;
+  STATE.nom       = nom;
+  STATE.langue    = langue;
+  STATE.modeMixte = document.getElementById('creer-mixte').checked;
+  STATE.tempsMax  = parseInt(document.getElementById('creer-temps').value);
+  STATE.estCreateur = true;
+
+  const btn = document.getElementById('btn-creer');
+  btn.disabled = true;
+  btn.textContent = '⏳ Connexion…';
+
+  if (!PAYS_LOCAL || PAYS_LOCAL._langue !== langue) await chargerPaysLocal(langue);
+
+  STATE.modeJeu = document.getElementById('creer-mode')?.value || 'classique';
+  let viesMode = parseInt(document.getElementById('creer-vies').value);
+  let tempsMode = STATE.tempsMax;
+  if (STATE.modeJeu === 'blitz')  tempsMode = 5;
+  if (STATE.modeJeu === 'survie') viesMode = 1;
+  STATE.tempsMax = tempsMode;
+
+  const connecte = await tenterConnexionServeur(true, {
+    langue,
+    mode_mixte: STATE.modeMixte,
+    vies:        viesMode,
+    temps:       tempsMode,
+    max_joueurs: parseInt(document.getElementById('creer-max').value),
+    mode_jeu:    STATE.modeJeu,
+  });
+
+  btn.disabled = false;
+  btn.textContent = '🗺️ Créer la partie';
+
+  if (!connecte) {
+    toast('🔌 Serveur non disponible', 'error');
+  }
+}
+
+// ── Rejoindre ────────────────────────────────────
+async function rejoindreParCode(codeForce) {
+  const code = (codeForce || document.getElementById('rejoindre-code')?.value || '').trim().toUpperCase();
+  const nom  = (document.getElementById('rejoindre-nom')?.value || '').trim() || 'Joueur';
+  if (!code || code.length !== 6) { toast('Code invalide (6 lettres)', 'error'); return; }
+
+  STATE.nom         = nom;
+  STATE.estCreateur = false;
+
+  const btn = document.querySelector('#step-rejoindre .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Connexion…'; }
+
+  try {
+    const r = await fetch(`${SERVEUR_HTTP}/parties/${code}`, { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) { toast('Salle introuvable', 'error'); resetBtnRejoindre(); return; }
+    const data = await r.json();
+    // Vérifier l'état AVANT d'ouvrir le WebSocket
+    if (data.etat === 'en_cours') {
+      toast('❌ Cette partie a déjà commencé !', 'error');
+      resetBtnRejoindre(); return;
+    }
+    if (data.etat === 'terminee') {
+      toast('❌ Cette partie est terminée.', 'error');
+      resetBtnRejoindre(); return;
+    }
+    const nbJoueurs = data.joueurs ? data.joueurs.length : 0;
+    if (nbJoueurs >= (data.config?.max_joueurs || 8)) {
+      toast('❌ La salle est pleine !', 'error');
+      resetBtnRejoindre(); return;
+    }
+    const cfg = data.config || {};
+    STATE.langue    = cfg.langue    || 'fr';
+    STATE.modeMixte = cfg.mode_mixte || false;
+    STATE.tempsMax  = cfg.temps      || 15;
+  } catch {
+    toast('Serveur non disponible', 'error'); resetBtnRejoindre(); return;
+  }
+
+  if (!PAYS_LOCAL || PAYS_LOCAL._langue !== STATE.langue) await chargerPaysLocal(STATE.langue);
+
+  const connecte = await tenterConnexionServeur(false, null, code);
+  if (!connecte) toast('Impossible de rejoindre', 'error');
+  resetBtnRejoindre();
+}
+
+function resetBtnRejoindre() {
+  const btn = document.querySelector('#step-rejoindre .btn-primary');
+  if (btn) { btn.disabled = false; btn.textContent = 'Rejoindre →'; }
+}
+
+// ── Parties publiques ────────────────────────────
+async function rafraichirRooms() {
+  const list = document.getElementById('rooms-list');
+  list.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px;text-align:center">Recherche…</div>';
+  try {
+    const r = await fetch(`${SERVEUR_HTTP}/parties`, { signal: AbortSignal.timeout(4000) });
+    const rooms = await r.json();
+    list.innerHTML = '';
+    if (!rooms.length) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px;text-align:center">Aucune partie disponible</div>';
+      return;
+    }
+    rooms.forEach(room => {
+      const div = document.createElement('div');
+      div.className = 'room-item';
+      div.innerHTML = `<span class="room-id">${room.room_id}</span><span class="room-info">${room.joueurs}/${room.max_joueurs} joueurs · ${room.langue === 'fr' ? '🇫🇷' : '🇬🇧'}</span>`;
+      div.onclick = () => {
+        // Pré-remplir le code et aller sur l'étape rejoindre
+        allerStep('step-rejoindre');
+        document.getElementById('rejoindre-code').value = room.room_id;
+      };
+      list.appendChild(div);
+    });
+  } catch {
+    list.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px;text-align:center">Serveur non disponible</div>';
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  CONNEXION WEBSOCKET
+// ══════════════════════════════════════════════════
+async function tenterConnexionServeur(creer, config, roomId = null) {
+  try {
+    if (creer) {
+      const r = await fetch(`${SERVEUR_HTTP}/parties`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+        signal: AbortSignal.timeout(4000),
+      });
+      const data = await r.json();
+      STATE.roomId = data.room_id;
+    } else {
+      STATE.roomId = roomId;
+    }
+
+    const ws = new WebSocket(
+      `${SERVEUR_WS}/ws/${STATE.roomId}/${encodeURIComponent(STATE.joueurId)}/${encodeURIComponent(STATE.nom)}`
+    );
+
+    return await new Promise((resolve) => {
+      const timer = setTimeout(() => { ws.close(); resolve(false); }, 5000);
+
+      ws.onopen = () => {
+        clearTimeout(timer);
+        STATE.ws = ws;
+        STATE.modeConnecte = true; // ← CRITIQUE : active le mode multijoueur
+        ws.onmessage = onMessage;
+        ws.onclose   = (evt) => onClose(evt);
+        ws.onerror   = () => {};
+        afficherLobby();
+        resolve(true);
+      };
+      ws.onerror = () => { clearTimeout(timer); resolve(false); };
+    });
+  } catch {
+    return false;
+  }
+}
+
+function envoyerWS(data) {
+  if (STATE.ws && STATE.ws.readyState === WebSocket.OPEN) {
+    STATE.ws.send(JSON.stringify(data));
+  }
+}
+
+function onMessage(evt) {
+  const msg = JSON.parse(evt.data);
+  debugLog(`📨 ${msg.type} | actuel=${msg.joueur_actuel?.slice(0,8)} | seq="${msg.sequence}"`);
+  traiterMessage(msg);
+}
+
+// ── Panneau debug (appuyer D pour toggle) ──────────
+let DEBUG_ON = false;
+function debugLog(txt) {
+  if (!DEBUG_ON) return;
+  const el = document.getElementById('debug-panel');
+  if (!el) return;
+  const line = document.createElement('div');
+  line.textContent = new Date().toLocaleTimeString('fr') + ' ' + txt;
+  line.style.cssText = 'font-size:10px;border-bottom:1px solid #333;padding:2px 0;word-break:break-all';
+  el.prepend(line);
+  while (el.children.length > 20) el.lastChild.remove();
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'd' && e.ctrlKey) {
+    DEBUG_ON = !DEBUG_ON;
+    const el = document.getElementById('debug-panel');
+    if (el) el.style.display = DEBUG_ON ? 'block' : 'none';
+    if (DEBUG_ON) {
+      debugLog(`👤 monId=${STATE.joueurId.slice(0,8)} | connecté=${STATE.modeConnecte}`);
+    }
+  }
+});
+
+let _reconnectAttempts = 0;
+let _reconnectTimer = null;
+
+function onClose(evt) {
+  STATE.ws = null;
+  STATE.modeConnecte = false;
+  // Codes spéciaux : partie en cours ou pleine
+  if (evt && evt.code === 4001) {
+    toast('❌ Cette partie a déjà commencé.', 'error');
+    setTimeout(() => afficherEcran('screen-accueil'), 1500);
+    return;
+  }
+  if (evt && evt.code === 4002) {
+    toast('❌ La salle est pleine.', 'error');
+    setTimeout(() => afficherEcran('screen-accueil'), 1500);
+    return;
+  }
+
+  // Si en cours de partie → tenter reconnexion automatique
+  const enJeu = !document.getElementById('screen-jeu').classList.contains('hidden');
+  const enLobby = !document.getElementById('screen-lobby').classList.contains('hidden');
+
+  if ((enJeu || enLobby) && STATE.roomId && _reconnectAttempts < 5) {
+    const delai = Math.min(1500 * Math.pow(1.5, _reconnectAttempts), 8000);
+    _reconnectAttempts++;
+    toast(`🔌 Déconnecté — reconnexion dans ${Math.round(delai/1000)}s… (${_reconnectAttempts}/5)`, 'warn');
+    _reconnectTimer = setTimeout(async () => {
+      const ok = await tenterReconnexion();
+      if (ok) {
+        _reconnectAttempts = 0;
+        toast('✅ Reconnecté !', '');
+      }
+    }, delai);
+  } else if (enJeu || enLobby) {
+    toast('🔌 Connexion perdue — impossible de reconnecter', 'error');
+    // Proposer de retourner à l'accueil après 3s
+    setTimeout(() => {
+      if (confirm("Connexion perdue. Retourner à l'accueil ?")) retourAccueil();
+    }, 3000);
+  }
+}
+
+async function tenterReconnexion() {
+  if (!STATE.roomId || !STATE.joueurId) return false;
+  try {
+    const ws = new WebSocket(
+      `${SERVEUR_WS}/ws/${STATE.roomId}/${encodeURIComponent(STATE.joueurId)}/${encodeURIComponent(STATE.nom)}`
+    );
+    return await new Promise((resolve) => {
+      const timer = setTimeout(() => { ws.close(); resolve(false); }, 5000);
+      ws.onopen = () => {
+        clearTimeout(timer);
+        STATE.ws = ws;
+        STATE.modeConnecte = true;
+        ws.onmessage = onMessage;
+        ws.onclose   = (evt) => onClose(evt);
+        ws.onerror   = () => {};
+        resolve(true);
+      };
+      ws.onerror = () => { clearTimeout(timer); resolve(false); };
+    });
+  } catch { return false; }
+}
+
+// ══════════════════════════════════════════════════
+//  TRAITEMENT DES MESSAGES SERVEUR
+// ══════════════════════════════════════════════════
+function traiterMessage(msg) {
+  debugLog(`⚙️ traiter: ${msg.type} | monTour=${msg.joueur_actuel === STATE.joueurId} | connecté=${STATE.modeConnecte}`);
+  switch(msg.type) {
+    case 'etat':
+    case 'joueur_rejoint':
+    case 'joueur_parti':
+      mettreAJourEtat(msg);
+      break;
+
+    case 'erreur':
+      toast(msg.message, 'error');
+      // Si erreur de rejoindre (partie en cours ou pleine) → retour accueil
+      if (msg.message && msg.message.startsWith('❌')) {
+        setTimeout(() => {
+          if (STATE.ws) { STATE.ws.close(); STATE.ws = null; }
+          afficherEcran('screen-accueil');
+        }, 2500);
+      }
+      break;
+
+    case 'partie_demarree':
+      // Synchroniser la config depuis le snapshot serveur
+      if (msg.config) {
+        STATE.langue    = msg.config.langue     || STATE.langue;
+        STATE.modeMixte = msg.config.mode_mixte || false;
+        STATE.tempsMax  = msg.config.temps       || STATE.tempsMax;
+        STATE.modeJeu   = msg.config.mode_jeu   || 'classique';
+      }
+      // S'assurer que le mode connecté est bien activé (sécurité)
+      STATE.modeConnecte = true;
+      // ── CORRECTION INVITÉ : vérifier que notre joueurId matche le serveur
+      // Si l'UUID local ne correspond pas (encodage URL, etc.), chercher par nom
+      if (msg.joueurs) {
+        const moi = msg.joueurs.find(j => j.id === STATE.joueurId);
+        if (!moi) {
+          const parNom = msg.joueurs.find(j => j.nom === STATE.nom && !j.est_ia);
+          if (parNom) {
+            debugLog('⚠️ joueurId corrigé: ' + STATE.joueurId.slice(0,8) + ' → ' + parNom.id.slice(0,8));
+            STATE.joueurId = parNom.id;
+          }
+        }
+      }
+      afficherEcran('screen-jeu');
+      construireClavier();
+      // Badge mode
+      {
+        const badge = document.getElementById('mode-badge');
+        const labels = { classique:'🎯 CLASSIQUE', blitz:'⚡ BLITZ', survie:'💀 SURVIE', acceleration:'🔥 ACCÉLÉRATION' };
+        if (badge && STATE.modeJeu !== 'classique') {
+          badge.textContent = labels[STATE.modeJeu] || '';
+          badge.style.display = 'block';
+        } else if (badge) badge.style.display = 'none';
+      }
+      mettreAJourEtat(msg);
+      toast('🎮 La partie commence !');
+      break;
+
+    case 'nouveau_tour':
+      stopChrono();
+      STATE.joueurFautif = msg.joueur_fautif || null;
+      if (document.getElementById('screen-jeu').classList.contains('hidden')) {
+        afficherEcran('screen-jeu');
+      }
+      if (!document.getElementById('keyboard').children.length) construireClavier();
+      // Avertissement Niger/Nigeria — affiché pour tout le monde
+      if (msg.sequence_est_pays) {
+        const cEstMoi = msg.joueur_actuel === STATE.joueurId;
+        const nomJoueur = msg.joueurs?.find(j => j.id === msg.joueur_actuel)?.nom || 'Le joueur';
+        if (cEstMoi) {
+          toast(`⚠️ "${msg.sequence_pays_nom}" est un pays ! Ajoute une lettre pour continuer ou donne ta langue au chat.`, 'warn');
+        } else {
+          toast(`👀 La séquence forme "${msg.sequence_pays_nom}" — ${nomJoueur} doit continuer ou défendre !`, '');
+        }
+      }
+      mettreAJourEtat(msg);
+      STATE.nbTours++;
+      // Mode accélération : -1s par tour (min 3s)
+      if (STATE.modeJeu === 'acceleration') {
+        STATE.tempsMax = Math.max(3, (msg.config?.temps || STATE.tempsMax) - STATE.nbTours);
+      }
+      lancerChrono(STATE.tempsMax);
+      // Délai langue au chat : 2s après chaque nouveau tour
+      if (STATE.modeConnecte) {
+        const btnL = document.getElementById('btn-langue');
+        if (btnL) {
+          btnL.disabled = true;
+          setTimeout(() => {
+            if (STATE.estMonTour && (msg.sequence || '').length > 0) btnL.disabled = false;
+          }, 2100);
+        }
+      }
+      break;
+
+    case 'sequence_invalide':
+      jouerSon('erreur');
+      stopChrono();
+      STATE.joueurFautif = msg.joueur_fautif || null;
+      mettreAJourEtat(msg);
+      document.getElementById('letters-seq').classList.add('invalid');
+      setTimeout(() => document.getElementById('letters-seq').classList.remove('invalid'), 600);
+      // En multijoueur : animation secrète, pas de message explicatif
+      // Le bouton "langue au chat" du joueur suivant s'activera naturellement
+      if (!STATE.modeConnecte) toast(`⚠️ ${msg.message}`, 'warn');
+      break;
+
+    case 'mot_complet':
+      jouerSon('complet');
+      stopChrono();
+      document.querySelectorAll('.key').forEach(k => k.disabled = true);
+      document.getElementById('btn-langue').disabled = true;
+      mettreAJourEtat(msg);
+      document.getElementById('letters-seq').classList.add('complete');
+      ajouterDrapeau(msg.pays);
+      toast(`💀 ${msg.message}`, 'warn');
+      break;
+
+    case 'langue_au_chat':
+      jouerSon('langue');
+      stopChrono();
+      document.querySelectorAll('.key').forEach(k => k.disabled = true);
+      document.getElementById('btn-langue').disabled = true;
+      mettreAJourEtat(msg);
+      if (msg.interpelle === STATE.joueurId) {
+        ouvrirModalLangueAuChat(msg.message, msg.delai || 20);
+      } else {
+        toast(`🗣️ ${msg.message}`, 'warn');
+      }
+      break;
+
+        case 'verdict_langue_au_chat':
+      // Fermer tous les modaux langue au chat
+      document.getElementById('modal-langue').classList.add('hidden');
+      if (_lacCountdownInterval) { clearInterval(_lacCountdownInterval); _lacCountdownInterval = null; }
+      afficherVerdict(msg);
+      mettreAJourEtat(msg);
+      break;
+
+        case 'perte_vie':
+      jouerSon('vie');
+      stopChrono();
+      // Fermer modal langue au chat si ouvert
+      document.getElementById('modal-langue').classList.add('hidden');
+      document.getElementById('modal-verdict').classList.add('hidden');
+      if (_lacCountdownInterval) { clearInterval(_lacCountdownInterval); _lacCountdownInterval = null; }
+      mettreAJourEtat(msg);
+      toast(msg.message, msg.elimine ? 'error' : 'warn');
+      break;
+
+    case 'fin_partie':
+      jouerSon('victoire');
+      mettreAJourEtat(msg);
+      afficherFinDePartie(msg);
+      break;
+
+    case 'chat':
+      ajouterMessageChat(msg);
+      break;
+
+    case 'ia_langue_au_chat':
+      toast(msg.message, 'warn');
+      break;
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  LOBBY
+// ══════════════════════════════════════════════════
+function afficherLobby() {
+  afficherEcran('screen-lobby');
+  document.getElementById('lobby-code').textContent = STATE.roomId;
+  const lien = `${window.location.href.split('?')[0]}?room=${STATE.roomId}`;
+  document.getElementById('lien-partage').textContent = lien;
+  // Remettre le lien visible (peut avoir été masqué en solo)
+  const lienWrap = document.querySelector('.link-share');
+  if (lienWrap) lienWrap.style.display = '';
+  mettreAJourBoutonsLobby();
+  document.getElementById('chat-toggle-btn').classList.remove('hidden');
+}
+
+function mettreAJourBoutonsLobby() {
+  const actions = document.getElementById('lobby-actions');
+  const btnDemarrer = document.getElementById('btn-demarrer');
+
+  // Supprimer bouton dynamique précédent
+  const old = document.getElementById('btn-lobby-action');
+  if (old) old.remove();
+
+  if (STATE.estCreateur) {
+    // Créateur : peut ajouter des bots + lancer
+    const btn = document.createElement('button');
+    btn.id = 'btn-lobby-action';
+    btn.className = 'btn btn-secondary';
+    btn.innerHTML = '🤖 Ajouter un bot';
+    btn.onclick = ajouterIA;
+    actions.insertBefore(btn, btnDemarrer);
+    btnDemarrer.style.display = '';
+  } else {
+    // Invité : peut quitter la salle
+    const btn = document.createElement('button');
+    btn.id = 'btn-lobby-action';
+    btn.className = 'btn btn-secondary';
+    btn.innerHTML = '← Quitter la salle';
+    btn.onclick = () => {
+      if (STATE.ws) { STATE.ws.close(); STATE.ws = null; }
+      afficherEcran('screen-accueil');
+      document.getElementById('chat-toggle-btn').classList.add('hidden');
+    };
+    actions.insertBefore(btn, btnDemarrer);
+    btnDemarrer.style.display = 'none';
+  }
+}
+
+function mettreAJourEtat(msg) {
+  STATE.etat = msg;
+
+  // Mettre à jour lobby
+  if (!document.getElementById('screen-lobby').classList.contains('hidden')) {
+    mettreAJourLobby(msg);
+  }
+
+  // Mettre à jour jeu
+  if (!document.getElementById('screen-jeu').classList.contains('hidden')) {
+    mettreAJourJeu(msg);
+  }
+}
+
+function mettreAJourLobby(msg) {
+  const joueurs = msg.joueurs || [];
+  const grid = document.getElementById('players-grid');
+  grid.innerHTML = '';
+
+  const avatars = ['🧑','👩','🧔','👱','🧕','👨‍💻','🧙','🦊'];
+  joueurs.forEach((j, i) => {
+    const div = document.createElement('div');
+    div.className = 'player-slot filled';
+    // Reconnaître "moi" même si l'UUID n'est pas encore synchronisé
+    const estMoi = j.id === STATE.joueurId || (!j.est_ia && j.nom === STATE.nom);
+    div.innerHTML = `
+      <div class="slot-avatar">${j.est_ia ? '🤖' : avatars[i % avatars.length]}</div>
+      <div class="slot-name">${escapeHtml(j.nom)}</div>
+      <div class="slot-tag">${j.est_ia ? 'BOT' : estMoi ? 'MOI' : 'EN LIGNE'}</div>
+    `;
+    grid.appendChild(div);
+  });
+
+  // Slots vides
+  const max = msg.config?.max_joueurs || 4;
+  for (let i = joueurs.length; i < max; i++) {
+    const div = document.createElement('div');
+    div.className = 'player-slot';
+    div.innerHTML = `<div class="slot-avatar" style="opacity:.2">👤</div><div class="slot-name" style="opacity:.2;font-size:11px">En attente…</div>`;
+    grid.appendChild(div);
+  }
+}
+
+async function ajouterIA() {
+  if (STATE.ws) {
+    try {
+      await fetch(`${SERVEUR_HTTP}/parties/${STATE.roomId}/ia`, { method: 'POST' });
+    } catch { toast('Serveur indisponible', 'error'); }
+  } else {
+    // Mode solo — ajouter IA locale
+    ajouterIALocale();
+  }
+}
+
+async function demarrerPartie() {
+  if (STATE.modeConnecte && STATE.ws) {
+    // Mode multijoueur — envoyer au serveur, ne JAMAIS lancer en solo
+    try {
+      const r = await fetch(
+        `${SERVEUR_HTTP}/parties/${STATE.roomId}/demarrer?joueur_id=${STATE.joueurId}`,
+        { method: 'POST', signal: AbortSignal.timeout(5000) }
+      );
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        toast(`Erreur : ${err.detail || r.status}`, 'error');
+      }
+      // Le serveur diffuse "partie_demarree" à tous via WS → pas besoin d'action ici
+    } catch (e) {
+      toast('Erreur serveur — réessaie', 'error');
+    }
+  } else if (!STATE.modeConnecte) {
+    // Mode solo uniquement si on n'est vraiment pas connecté
+    demarrerSolo();
+  }
+}
+
+function copierLien() {
+  const lien = document.getElementById('lien-partage').textContent;
+  navigator.clipboard.writeText(lien).then(() => toast('🔗 Lien copié !'));
+}
+
+// ══════════════════════════════════════════════════
+//  MISE À JOUR DE L'INTERFACE DE JEU
+// ══════════════════════════════════════════════════
+function mettreAJourJeu(msg) {
+  const seq = msg.sequence || '';
+  const monTour = msg.joueur_actuel === STATE.joueurId;
+  debugLog(`🎮 mettreAJourJeu | monId=${STATE.joueurId.slice(0,8)} | actuel=${msg.joueur_actuel?.slice(0,8)} | monTour=${monTour} | connecté=${STATE.modeConnecte}`);
+
+  // Séquence
+  const el = document.getElementById('letters-seq');
+  el.textContent = seq ? seq.split('').join(' - ') : '…';
+  el.className = 'letters-sequence';
+
+  // Indicateur de tour
+  STATE.estMonTour = monTour;
+  document.getElementById('turn-indicator').textContent =
+    monTour ? '⬇ Ton tour !' :
+    msg.joueurs?.find(j => j.id === msg.joueur_actuel)
+      ? `Tour de ${msg.joueurs.find(j => j.id === msg.joueur_actuel).nom}`
+      : '';
+
+  // Activer/désactiver clavier — géré par activerClavier() en mode solo
+  // En mode connecté, on l'applique ici directement
+  if (STATE.modeConnecte) {
+    // Lire joueur_fautif depuis le snapshot serveur (field ajouté dans serveur corrigé)
+    if ('joueur_fautif' in msg) STATE.joueurFautif = msg.joueur_fautif;
+    document.querySelectorAll('.key').forEach(k => k.disabled = !monTour);
+    const seqEnCours = (msg.sequence || '').length > 0;
+    const jeSuisFautif = STATE.joueurFautif === STATE.joueurId;
+    document.getElementById('btn-langue').disabled = !(monTour && seqEnCours && !jeSuisFautif);
+  }
+
+  // Possibilités — visible uniquement en solo
+  if (seq && !STATE.modeConnecte) {
+    const poss = chercherPossibilites(seq);
+    document.getElementById('poss-count').textContent =
+      poss.length ? `${poss.length} pays possible${poss.length > 1 ? 's' : ''}` : '';
+  } else {
+    document.getElementById('poss-count').textContent = '';
+  }
+
+  // Scores
+  mettreAJourScores(msg);
+}
+
+function mettreAJourScores(msg) {
+  const joueurs = msg.joueurs || [];
+  const viesMax = msg.config?.vies || 10;
+
+  function playerCard(j, side) {
+    const isActive = j.id === msg.joueur_actuel;
+    const dots = Array.from({ length: viesMax }, (_, k) => {
+      const lost = k >= j.vies;
+      return `<span class="tp-dot${lost ? ' lost' : ''}"></span>`;
+    }).join('');
+    const nom = (j.est_ia ? '🤖 ' : '') + j.nom;
+    const cls = 'topbar-player' + (isActive ? ' active' : '') + (side === 'right' ? ' right' : '');
+    return `<div class="${cls}">
+      <div class="tp-name">${nom}</div>
+      <div class="tp-dots">${dots}</div>
+    </div>`;
+  }
+
+  const chronoHtml = `
+    <div class="chrono-pill" id="chrono-pill">
+      <span class="hourglass-icon">⏳</span>
+      <span class="chrono-val" id="chrono-val">${STATE.tempsRestant || STATE.tempsMax}</span>
+    </div>`;
+
+  const row = document.getElementById('topbar-row');
+  const extra = document.getElementById('topbar-row-extra');
+
+  if (joueurs.length <= 2) {
+    // Affichage 3-zones : gauche | chrono | droite
+    const left  = joueurs[0] ? playerCard(joueurs[0], 'left')  : '<div class="topbar-player"></div>';
+    const right = joueurs[1] ? playerCard(joueurs[1], 'right') : '<div class="topbar-player"></div>';
+    row.innerHTML = left + chronoHtml + right;
+    extra.style.display = 'none';
+  } else {
+    // 3+ joueurs : 2 premiers en rangée principale, reste en extra
+    const left  = playerCard(joueurs[0], 'left');
+    const right = playerCard(joueurs[1], 'right');
+    row.innerHTML = left + chronoHtml + right;
+    extra.style.display = 'flex';
+    extra.innerHTML = joueurs.slice(2).map(j => playerCard(j, '')).join('');
+  }
+}
+
+function ajouterDrapeau(pays, valeurJouee = null) {
+  // BUG03 FIX — en mode mixte, afficher la valeur jouée (nom ou capitale)
+  const label = (valeurJouee && valeurJouee !== pays.nom)
+    ? `${valeurJouee} (${pays.nom})`
+    : pays.nom;
+  const inner = document.getElementById('flags-inner');
+  // Afficher le label "Derniers pays"
+  const lbl = document.getElementById('flags-label');
+  if (lbl) lbl.style.display = '';
+  const div = document.createElement('div');
+  div.className = 'flag-item';
+  div.innerHTML = `
+    <img src="https://flagcdn.com/w80/${pays.code}.png" alt="${pays.nom}"
+         onerror="this.style.display='none'">
+    <div class="flag-name">${label}</div>
+  `;
+  inner.appendChild(div);
+  inner.parentElement.scrollLeft = inner.scrollWidth;
+}
+
+// ══════════════════════════════════════════════════
+//  CLAVIER
+// ══════════════════════════════════════════════════
+function construireClavier() {
+  const kb = document.getElementById('keyboard');
+  kb.innerHTML = '';
+  ['AZERTYUIOP', 'QSDFGHJKLM', 'WXCVBN'].forEach(rangee => {
+    const row = document.createElement('div');
+    row.className = 'kb-row';
+    rangee.split('').forEach(l => {
+      const btn = document.createElement('button');
+      btn.className = 'key';
+      btn.textContent = l;
+      btn.dataset.lettre = l;
+      btn.disabled = false;
+      btn.onclick = () => appuyerTouche(l);
+      row.appendChild(btn);
+    });
+    kb.appendChild(row);
+  });
+}
+
+function appuyerTouche(lettre) {
+  jouerSon('touche');
+  debugLog(`⌨️ appuyerTouche(${lettre}) | estMonTour=${STATE.estMonTour} | connecté=${STATE.modeConnecte}`);
+  if (!STATE.estMonTour) return;
+
+  if (STATE.modeConnecte) {
+    envoyerWS({ action: 'lettre', lettre });
+  } else {
+    traiterLettreLocal(lettre);
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  CHRONO
+// ══════════════════════════════════════════════════
+function lancerChrono(secondes) {
+  clearInterval(STATE.chronoInterval);
+  STATE.tempsRestant = secondes;
+  STATE.tempsMax = secondes;
+  actualiserChrono();
+
+  STATE.chronoInterval = setInterval(() => {
+    STATE.tempsRestant--;
+    actualiserChrono();
+    if (STATE.tempsRestant <= 0) {
+      clearInterval(STATE.chronoInterval);
+      if (!STATE.modeConnecte && STATE.estMonTour) {
+        // Mode solo — temps écoulé
+        perdreVieLocal('⏰ Temps écoulé !');
+      }
+    }
+  }, 1000);
+}
+
+function actualiserChrono() {
+  const pct = (STATE.tempsRestant / STATE.tempsMax) * 100;
+  const urgent = STATE.tempsRestant <= 5;
+
+  // Barre de progression
+  const fill = document.getElementById('chrono-fill');
+  fill.style.width = pct + '%';
+  fill.classList.toggle('urgent', urgent);
+
+  // Pill sablier
+  const pill = document.getElementById('chrono-pill');
+  const val  = document.getElementById('chrono-val');
+  if (pill) {
+    pill.classList.toggle('urgent', urgent);
+    if (val) val.textContent = STATE.tempsRestant;
+  }
+
+  // Sablier tourne vite si urgent
+  const hg = document.getElementById('hourglass-display');
+  if (hg) hg.style.animationDuration = urgent ? '0.5s' : '3s';
+}
+
+// ══════════════════════════════════════════════════
+//  LANGUE AU CHAT
+// ══════════════════════════════════════════════════
+function demanderLangueAuChat() {
+  if (STATE.modeConnecte) {
+    envoyerWS({ action: 'langue_au_chat' });
+  } else {
+    demanderLangueAuChatLocal();
+  }
+}
+
+let _lacCountdownInterval = null;
+
+function ouvrirModalLangueAuChat(texte, delai) {
+  document.getElementById('modal-langue-text').textContent = texte || 'Quel pays avais-tu en tête ?';
+  document.getElementById('modal-langue-input').value = '';
+  document.getElementById('modal-langue').classList.remove('hidden');
+  setTimeout(() => document.getElementById('modal-langue-input').focus(), 100);
+
+  // Lancer le compte à rebours
+  const totalSec = delai || 20;
+  let restant = totalSec;
+  const elNum = document.getElementById('lac-countdown');
+  const elBar = document.getElementById('lac-progress');
+
+  if (_lacCountdownInterval) clearInterval(_lacCountdownInterval);
+
+  function majCountdown() {
+    if (elNum) {
+      elNum.textContent = restant;
+      elNum.style.color = restant <= 5 ? 'var(--crimson)' : restant <= 10 ? 'var(--amber)' : 'var(--teal)';
+    }
+    if (elBar) elBar.style.width = (restant / totalSec * 100) + '%';
+  }
+  majCountdown();
+
+  _lacCountdownInterval = setInterval(() => {
+    restant--;
+    majCountdown();
+    if (restant <= 0) {
+      clearInterval(_lacCountdownInterval);
+      // Le serveur va éliminer automatiquement — on ferme juste le modal
+      document.getElementById('modal-langue').classList.add('hidden');
+    }
+  }, 1000);
+}
+
+function validerLangueAuChat() {
+  const pays = document.getElementById('modal-langue-input').value.trim();
+  if (!pays) return;
+  document.getElementById('modal-langue').classList.add('hidden');
+  if (_lacCountdownInterval) { clearInterval(_lacCountdownInterval); _lacCountdownInterval = null; }
+
+  if (STATE.modeConnecte) {
+    envoyerWS({ action: 'reponse_langue_au_chat', pays });
+  } else {
+    evaluerReponseLocal(pays);
+  }
+}
+
+function afficherVerdict(msg) {
+  document.getElementById('verdict-emoji').textContent = msg.valide ? '✅' : '😂';
+  document.getElementById('verdict-title').textContent = msg.valide ? 'Bravo !' : "C'est Nul 😂";
+  document.getElementById('verdict-text').textContent = msg.message;
+  document.getElementById('modal-verdict').classList.remove('hidden');
+}
+
+function fermerVerdict() {
+  document.getElementById('modal-verdict').classList.add('hidden');
+}
+
+// ══════════════════════════════════════════════════
+//  CHAT
+// ══════════════════════════════════════════════════
+function toggleChat() {
+  const panel = document.getElementById('chat-panel');
+  panel.classList.toggle('open');
+  document.getElementById('chat-notif').classList.remove('show');
+  // Afficher/masquer la barre emojis en jeu
+  const emojiBar = document.getElementById('emoji-bar');
+  const enJeu = !document.getElementById('screen-jeu').classList.contains('hidden');
+  if (emojiBar) emojiBar.style.display = panel.classList.contains('open') && enJeu ? 'flex' : 'none';
+}
+
+const EMOJIS_RAPIDES = ['😂','👏','🔥','💀','😱','🤔','👍','😮','🎉','😤','🙌','👀'];
+
+function construireBarreEmojis() {
+  const bar = document.getElementById('emoji-bar');
+  if (!bar) return;
+  // Conserver le label
+  const label = bar.children[0];
+  bar.innerHTML = '';
+  bar.appendChild(label);
+  EMOJIS_RAPIDES.forEach(e => {
+    const btn = document.createElement('button');
+    btn.textContent = e;
+    btn.style.cssText = 'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:4px 6px;font-size:18px;cursor:pointer;transition:transform .1s';
+    btn.onmouseenter = () => btn.style.transform = 'scale(1.2)';
+    btn.onmouseleave = () => btn.style.transform = '';
+    btn.onclick = () => envoyerEmojiRapide(e);
+    bar.appendChild(btn);
+  });
+}
+
+function envoyerEmoji() {
+  // Ouvre un picker emoji simplifié
+  const bar = document.getElementById('emoji-bar');
+  if (!bar) return;
+  const visible = bar.style.display !== 'none' && bar.style.display !== '';
+  bar.style.display = visible ? 'none' : 'flex';
+  if (!visible && bar.children.length <= 1) construireBarreEmojis();
+}
+
+function envoyerEmojiRapide(emoji) {
+  jouerSon('emoji');
+  const heure = new Date().toLocaleTimeString('fr', {hour:'2-digit',minute:'2-digit'});
+  if (STATE.modeConnecte) {
+    envoyerWS({ action: 'chat', texte: emoji });
+  } else {
+    ajouterMessageChat({
+      joueur_id: STATE.joueurId,
+      nom: STATE.nom,
+      texte: emoji,
+      heure
+    });
+  }
+}
+
+function envoyerChat() {
+  const input = document.getElementById('chat-input');
+  const texte = input.value.trim();
+  if (!texte) return;
+  input.value = '';
+  const heure = new Date().toLocaleTimeString('fr', {hour:'2-digit',minute:'2-digit'});
+  if (STATE.modeConnecte) {
+    envoyerWS({ action: 'chat', texte });
+  } else {
+    // Mode solo : afficher le message localement
+    ajouterMessageChat({ joueur_id: STATE.joueurId, nom: STATE.nom, texte, heure });
+  }
+}
+
+function ajouterMessageChat(msg) {
+  const el = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  const estMoi = msg.joueur_id === STATE.joueurId;
+  // Détecter si c'est un emoji seul (réaction rapide)
+  const estEmoji = msg.texte && [...msg.texte].length === 1 &&
+    /\p{Emoji}/u.test(msg.texte);
+
+  if (msg.joueur_id) {
+    div.className = 'chat-msg' + (estMoi ? ' moi' : '');
+    if (estEmoji) {
+      div.innerHTML = `<div class="msg-author">${escapeHtml(msg.nom)} · ${msg.heure}</div>
+        <div style="font-size:32px;line-height:1.2">${escapeHtml(msg.texte)}</div>`;
+    } else {
+      div.innerHTML = `<div class="msg-author">${escapeHtml(msg.nom)} · ${msg.heure}</div>
+        <div class="msg-text">${escapeHtml(msg.texte)}</div>`;
+    }
+  } else {
+    div.className = 'chat-msg system';
+    div.innerHTML = `<div class="msg-text">${msg.message || escapeHtml(msg.texte || '')}</div>`;
+  }
+
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+
+  // Notif si panel fermé
+  if (!document.getElementById('chat-panel').classList.contains('open')) {
+    document.getElementById('chat-notif').classList.add('show');
+    // Si emoji reçu en jeu : afficher un toast flottant rapide
+    if (estEmoji && msg.joueur_id && !estMoi) {
+      toast(`${msg.nom} : ${msg.texte}`, '');
+    }
+  }
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════════════════
+//  MODE SOLO (sans serveur) — IA locale
+//  Réécriture complète et fidèle à main.py
+// ══════════════════════════════════════════════════
+
+// État solo — miroir des attributs self.* de PaysGameApp
+let SOLO = {
+  joueurs:      [],
+  indexTour:    0,
+  sequence:     '',
+  paysJoues:    new Set(),
+  paysJouesList:[],
+  joueurFautif: null,
+  viesDepart:   10,
+};
+
+// ── _lancer_mode_solo() ───────────────────────────
+function lancerModeSolo(viesParam) {
+  const vies = viesParam || parseInt(document.getElementById('solo-vies')?.value) || 10;
+  STATE.modeConnecte = false;
+  STATE.nbTours      = 0;
+  // tempsMax et modeMixte déjà définis par lancerSolo() ou STATE
+  if (!STATE.tempsMax) STATE.tempsMax = 15;
+
+  SOLO.viesDepart    = vies;
+  SOLO.joueurs       = [
+    { id: STATE.joueurId, nom: STATE.nom || 'Joueur', vies, en_vie: true, est_ia: false },
+    { id: 'ia', nom: '🤖 Ordinateur', vies, en_vie: true, est_ia: true },
+  ];
+  SOLO.indexTour     = 0;
+  SOLO.sequence      = '';
+  SOLO.paysJoues     = new Set();
+  SOLO.paysJouesList = [];
+  SOLO.joueurFautif  = null;
+
+  afficherEcran('screen-lobby');
+  document.getElementById('lobby-code').textContent = 'SOLO';
+
+  // Masquer le lien de partage en solo (pas de sens)
+  const lienWrap = document.querySelector('.link-share');
+  if (lienWrap) lienWrap.style.display = 'none';
+
+  // Bouton démarrer
+  const btnDem = document.getElementById('btn-demarrer');
+  btnDem.style.display = '';
+  btnDem.onclick = demarrerSolo;
+
+  // Bouton "Ajouter bot" en solo (créer dynamiquement)
+  const actions = document.getElementById('lobby-actions');
+  const oldBtn = document.getElementById('btn-lobby-action');
+  if (oldBtn) oldBtn.remove();
+  const btnBot = document.createElement('button');
+  btnBot.id = 'btn-lobby-action';
+  btnBot.className = 'btn btn-secondary';
+  btnBot.innerHTML = '🤖 Ajouter un bot';
+  btnBot.onclick = ajouterIALocale;
+  actions.insertBefore(btnBot, btnDem);
+
+  // Masquer le chat en solo (pas de serveur)
+  document.getElementById('chat-toggle-btn').classList.add('hidden');
+
+  mettreAJourLobbyLocal();
+}
+
+// ── _ajouter_ia_locale() ─────────────────────────
+function ajouterIALocale() {
+  if (SOLO.joueurs.length >= 4) return;
+  SOLO.joueurs.push({
+    id: `ia${SOLO.joueurs.length}`,
+    nom: '🤖 Bot',
+    vies: SOLO.viesDepart,
+    en_vie: true,
+    est_ia: true,
+  });
+  mettreAJourLobbyLocal();
+}
+
+function mettreAJourLobbyLocal() {
+  mettreAJourLobby({ joueurs: SOLO.joueurs, config: { max_joueurs: 4 } });
+}
+
+// ── _demarrer_solo() ──────────────────────────────
+function demarrerSolo() {
+  document.getElementById('flags-inner').innerHTML = '';
+  afficherEcran('screen-jeu');
+  construireClavier();
+  // Afficher badge mode
+  const badge = document.getElementById('mode-badge');
+  const labels = { classique:'🎯 CLASSIQUE', blitz:'⚡ BLITZ', survie:'💀 SURVIE', acceleration:'🔥 ACCÉLÉRATION' };
+  if (badge && STATE.modeJeu !== 'classique') {
+    badge.textContent = labels[STATE.modeJeu] || '';
+    badge.style.display = 'block';
+  } else if (badge) badge.style.display = 'none';
+  nouveauTourSolo(true);
+}
+
+// ── _joueur_actuel_solo() ─────────────────────────
+function joueurActuelSolo() {
+  return SOLO.joueurs[SOLO.indexTour];
+}
+
+// ── _nouveau_tour_solo(reset_sequence) ───────────
+function nouveauTourSolo(reset) {
+  if (reset === undefined) reset = true;
+  if (reset) {
+    SOLO.sequence     = '';
+    SOLO.joueurFautif = null;
+  }
+  STATE.nbTours++;
+
+  const j = joueurActuelSolo();
+  STATE.estMonTour = (j.id === STATE.joueurId);
+
+  mettreAJourJeu({
+    sequence:      SOLO.sequence,
+    joueur_actuel: j.id,
+    joueurs:       SOLO.joueurs,
+    config:        { vies: SOLO.viesDepart },
+  });
+  // Mode accélération : -1s par tour (min 3s)
+  if (STATE.modeJeu === 'acceleration') {
+    STATE.tempsMax = Math.max(3, (SOLO.tempsDepart || 15) - STATE.nbTours);
+  }
+  lancerChrono(STATE.tempsMax);
+
+  if (j.est_ia) {
+    activerClavier(false);
+    setTimeout(iaJouerSolo, 1000 + Math.random() * 1200);
+  } else {
+    activerClavier(true);
+  }
+}
+
+// ── _activer_clavier(actif) ───────────────────────
+function activerClavier(actif) {
+  document.querySelectorAll('.key').forEach(k => { k.disabled = !actif; });
+  const languePossible = actif
+    && SOLO.sequence.length > 0
+    && SOLO.joueurFautif !== STATE.joueurId;
+  document.getElementById('btn-langue').disabled = !languePossible;
+}
+
+// ── _traiter_lettre_solo(lettre) ──────────────────
+function traiterLettreLocal(lettre) {
+  if (!STATE.estMonTour) return;
+
+  const nouvelleSeq  = normaliser(SOLO.sequence) + normaliser(lettre);
+  const possibilites = soloChercherPossibilites(nouvelleSeq);
+
+  if (possibilites.length === 0) {
+    jouerSon('erreur');
+    flashSequence('invalid');
+    SOLO.sequence     = nouvelleSeq;
+    SOLO.joueurFautif = STATE.joueurId;
+    mettreAJourJeu({
+      sequence: nouvelleSeq, joueur_actuel: STATE.joueurId,
+      joueurs: SOLO.joueurs, config: { vies: SOLO.viesDepart },
+    });
+    toast("⚠️ Séquence invalide — l'IA peut demander une langue au chat", 'warn');
+    passerAuSuivantSolo();
+    return;
+  }
+
+  SOLO.sequence = nouvelleSeq;
+  const match   = soloEstComplet(nouvelleSeq);
+
+  if (match) {
+    if (SOLO.paysJoues.has(match.nom_normalise)) {
+      toast(`🔁 ${match.nom} déjà joué ! Tu perds une vie.`, 'error');
+      stopChrono();
+      setTimeout(() => perdreVieSolo(STATE.joueurId, 'Pays déjà joué'), 500);
+      return;
+    }
+    const valeur = soloValeurJouee(match, nouvelleSeq);
+    SOLO.paysJoues.add(match.nom_normalise);
+    SOLO.paysJouesList.push({ ...match, _valeur_jouee: valeur });
+    ajouterDrapeau(match, valeur);
+    flashSequence('complete');
+    toast(`💀 Tu as complété « ${valeur} » — tu perds une vie !`, 'warn');
+    stopChrono();
+    setTimeout(() => perdreVieSolo(STATE.joueurId, 'Mot complet'), 1500);
+  } else {
+    mettreAJourJeu({
+      sequence: nouvelleSeq, joueur_actuel: STATE.joueurId,
+      joueurs: SOLO.joueurs, config: { vies: SOLO.viesDepart },
+    });
+    passerAuSuivantSolo();
+  }
+}
+
+// ── _ia_jouer_solo() ──────────────────────────────
+function iaJouerSolo() {
+  // Vérifier que c'est encore le tour de l'IA
+  const j = joueurActuelSolo();
+  if (!j || !j.est_ia) return;
+
+  const seqNorm      = normaliser(SOLO.sequence);
+  const possibilites = soloChercherPossibilites(seqNorm);
+
+  if (possibilites.length === 0) {
+    if (SOLO.joueurFautif === STATE.joueurId) {
+      ouvrirModalLangueAuChat("L'IA te demande : quel pays visais-tu ?");
+    } else {
+      toast("🤖 L'IA donne sa langue au chat ! Elle perd une vie.", 'warn');
+      stopChrono();
+      perdreVieSolo('ia', 'IA piégée');
+    }
+    return;
+  }
+
+  const nonJoues = possibilites.filter(p => !SOLO.paysJoues.has(p.nom_normalise));
+
+  if (nonJoues.length === 0) {
+    toast("🤖 L'IA est piégée (tous les pays déjà joués) ! Elle perd une vie.", 'warn');
+    stopChrono();
+    perdreVieSolo('ia', 'Tous pays joués');
+    return;
+  }
+
+  const longues = nonJoues.filter(p => p[p._cible].length > seqNorm.length + 1);
+  const cibles  = longues.length > 0 ? longues : nonJoues;
+  const cible   = cibles[Math.floor(Math.random() * cibles.length)];
+
+  const lettreSuivante = cible[cible._cible][seqNorm.length];
+  const nouvelleSeq    = seqNorm + lettreSuivante;
+
+  SOLO.sequence     = nouvelleSeq;
+  SOLO.joueurFautif = 'ia';
+
+  const match = soloEstComplet(nouvelleSeq);
+  if (match) {
+    if (SOLO.paysJoues.has(match.nom_normalise)) {
+      toast(`🔁 L'IA a joué ${match.nom} déjà joué ! Elle perd une vie.`, 'warn');
+      stopChrono();
+      setTimeout(() => perdreVieSolo('ia', 'Pays déjà joué'), 500);
+      return;
+    }
+    const valeur = soloValeurJouee(match, nouvelleSeq);
+    SOLO.paysJoues.add(match.nom_normalise);
+    SOLO.paysJouesList.push({ ...match, _valeur_jouee: valeur });
+    ajouterDrapeau(match, valeur);
+    mettreAJourJeu({
+      sequence: nouvelleSeq, joueur_actuel: 'ia',
+      joueurs: SOLO.joueurs, config: { vies: SOLO.viesDepart },
+    });
+    flashSequence('complete');
+    toast(`💀 L'IA a complété « ${valeur} » — elle perd une vie !`, 'warn');
+    stopChrono();
+    setTimeout(() => perdreVieSolo('ia', 'Mot complet'), 1500);
+  } else {
+    mettreAJourJeu({
+      sequence: nouvelleSeq, joueur_actuel: 'ia',
+      joueurs: SOLO.joueurs, config: { vies: SOLO.viesDepart },
+    });
+    passerAuSuivantSolo();
+  }
+}
+
+// ── _demander_langue_locale() ─────────────────────
+function demanderLangueAuChatLocal() {
+  stopChrono();
+  const seqNorm      = normaliser(SOLO.sequence);
+  const possibilites = soloChercherPossibilites(seqNorm).filter(
+    p => p[p._cible].startsWith(seqNorm) && !SOLO.paysJoues.has(p.nom_normalise)
+  );
+  setTimeout(() => {
+    if (possibilites.length > 0) {
+      const pays   = possibilites[Math.floor(Math.random() * possibilites.length)];
+      const valeur = pays._cible === 'nom_normalise' ? pays.nom : pays.capitale;
+      SOLO.paysJoues.add(pays.nom_normalise);
+      SOLO.paysJouesList.push({ ...pays, _valeur_jouee: valeur });
+      ajouterDrapeau(pays, valeur);
+      afficherVerdict({ valide: true, message: `L'IA visait « ${valeur} » (${SOLO.sequence}…). Valide ! Tu perds une vie.` });
+      setTimeout(() => { fermerVerdict(); perdreVieSolo(STATE.joueurId, 'Langue au chat perdue'); }, 2000);
+    } else {
+      afficherVerdict({ valide: false, message: `L'IA ne peut pas justifier « ${SOLO.sequence} » ! Elle perd une vie.` });
+      setTimeout(() => { fermerVerdict(); perdreVieSolo('ia', 'IA sans réponse'); }, 2000);
+    }
+  }, 800);
+}
+
+// ── _evaluer_reponse_locale(pays_propose) ─────────
+function evaluerReponseLocal(paysPropose) {
+  const norm    = normaliser(paysPropose);
+  const seqNorm = normaliser(SOLO.sequence);
+
+  let match      = PAYS_LOCAL ? (PAYS_LOCAL.find(p => p.nom_normalise === norm) || null) : null;
+  let champMatch = 'nom_normalise';
+  let valeurAff  = paysPropose;
+
+  if (!match && STATE.modeMixte && PAYS_LOCAL) {
+    match = PAYS_LOCAL.find(p => p.capitale_normalisee === norm) || null;
+    if (match) { champMatch = 'capitale_normalisee'; valeurAff = match.capitale || paysPropose; }
+  }
+
+  if (!match) {
+    afficherVerdict({ valide: false, message: `« ${paysPropose} » n'existe pas ! Tu perds une vie.` });
+    setTimeout(() => { fermerVerdict(); perdreVieSolo(STATE.joueurId, 'Pays inexistant'); }, 2000);
+  } else if (SOLO.paysJoues.has(match.nom_normalise)) {
+    afficherVerdict({ valide: false, message: `« ${valeurAff} » a déjà été joué ! Tu perds une vie.` });
+    setTimeout(() => { fermerVerdict(); perdreVieSolo(STATE.joueurId, 'Pays déjà joué'); }, 2000);
+  } else if (!match[champMatch].startsWith(seqNorm)) {
+    afficherVerdict({ valide: false, message: `« ${valeurAff} » ne commence pas par « ${SOLO.sequence} » ! Tu perds une vie.` });
+    setTimeout(() => { fermerVerdict(); perdreVieSolo(STATE.joueurId, 'Pays incohérent'); }, 2000);
+  } else {
+    SOLO.paysJoues.add(match.nom_normalise);
+    SOLO.paysJouesList.push({ ...match, _valeur_jouee: valeurAff });
+    ajouterDrapeau(match, valeurAff);
+    afficherVerdict({ valide: true, message: `✅ « ${valeurAff} » commence bien par « ${SOLO.sequence} » ! L'IA perd une vie.` });
+    setTimeout(() => { fermerVerdict(); perdreVieSolo('ia', 'Langue au chat perdue'); }, 2000);
+  }
+}
+
+// ── _perdre_vie_solo(joueur_id, raison) ───────────
+function perdreVieLocal(raison) { perdreVieSolo(STATE.joueurId, raison); }
+
+function perdreVieSolo(joueurId, raison) {
+  stopChrono();
+  const j = SOLO.joueurs.find(x => x.id === joueurId);
+  if (!j) return;
+
+  j.vies--;
+  if (j.vies <= 0) { j.vies = 0; j.en_vie = false; toast(`😂 ${j.nom} est OUTTT !`, 'error'); }
+
+  mettreAJourScores({
+    sequence: SOLO.sequence, joueur_actuel: null,
+    joueurs: SOLO.joueurs, config: { vies: SOLO.viesDepart },
+  });
+
+  const vivants = SOLO.joueurs.filter(x => x.en_vie);
+  if (vivants.length <= 1) {
+    setTimeout(() => afficherFinDePartieLocal(vivants[0] || null), 800);
+    return;
+  }
+
+  const idxJ = SOLO.joueurs.indexOf(j);
+  if (j.en_vie) {
+    SOLO.indexTour = idxJ;
+  } else {
+    const n = SOLO.joueurs.length;
+    let idx = idxJ;
+    for (let i = 0; i < n; i++) { idx = (idx + 1) % n; if (SOLO.joueurs[idx].en_vie) break; }
+    SOLO.indexTour = idx;
+  }
+  setTimeout(() => nouveauTourSolo(true), 800);
+}
+
+// ── _passer_suivant_solo() — NE reset PAS la séquence
+function passerAuSuivantSolo() {
+  const n = SOLO.joueurs.length;
+  for (let i = 0; i < n; i++) {
+    SOLO.indexTour = (SOLO.indexTour + 1) % n;
+    if (SOLO.joueurs[SOLO.indexTour].en_vie) break;
+  }
+  setTimeout(() => nouveauTourSolo(false), 150);
+}
+
+// ── Utilitaires ───────────────────────────────────
+
+function stopChrono() {
+  clearInterval(STATE.chronoInterval);
+  STATE.chronoInterval = null;
+}
+
+function flashSequence(type) {
+  const el = document.getElementById('letters-seq');
+  el.classList.add(type);
+  setTimeout(() => el.classList.remove(type), 600);
+}
+
+function soloValeurJouee(match, seqNorm) {
+  if (STATE.modeMixte && seqNorm === match.capitale_normalisee) return match.capitale;
+  return match.nom;
+}
+
+function soloChercherPossibilites(seq) {
+  if (!PAYS_LOCAL || !PAYS_LOCAL.length) return [];
+  const s = normaliser(seq);
+  if (!s) return PAYS_LOCAL.map(p => ({ ...p, _cible: 'nom_normalise' }));
+  const res = [];
+  for (const p of PAYS_LOCAL) {
+    if (p.nom_normalise.startsWith(s)) {
+      res.push({ ...p, _cible: 'nom_normalise' });
+    } else if (STATE.modeMixte && p.capitale_normalisee && p.capitale_normalisee.startsWith(s)) {
+      res.push({ ...p, _cible: 'capitale_normalisee' });
+    }
+  }
+  return res;
+}
+
+function soloEstComplet(seq) {
+  const s = normaliser(seq);
+  if (!PAYS_LOCAL) return null;
+  for (const p of PAYS_LOCAL) {
+    if (p.nom_normalise === s) return p;
+    if (STATE.modeMixte && p.capitale_normalisee === s) return p;
+  }
+  return null;
+}
+
+// estComplet et chercherPossibilites — alias pour compatibilité mode connecté
+function estComplet(seq) { return soloEstComplet(seq); }
+function chercherPossibilites(seq) { return soloChercherPossibilites(seq); }
+
+
+// ══════════════════════════════════════════════════
+//  FIN DE PARTIE
+// ══════════════════════════════════════════════════
+function afficherFinDePartie(msg) {
+  const moi = msg.joueurs?.find(j => j.id === STATE.joueurId);
+  if (moi) {
+    sauvegarderScore(moi.nom, moi.vies,
+      msg.pays_joues?.length || 0, STATE.nbTours,
+      msg.gagnant === STATE.joueurId ? 1 : 0);
+  }
+  clearInterval(STATE.chronoInterval);
+  const gagnant = msg.joueurs?.find(j => j.id === msg.gagnant);
+  document.getElementById('winner-name').textContent = gagnant ? gagnant.nom : '—';
+  document.getElementById('stat-pays').textContent = msg.pays_joues?.length || 0;
+  document.getElementById('stat-tours').textContent = STATE.nbTours;
+  document.getElementById('stat-vies').textContent = gagnant?.vies || 0;
+  // Stocker les pays joués pour afficherPaysJoues()
+  STATE.paysJouesList = (msg.pays_joues || []).map(p => ({ ...p, _valeur_jouee: p.nom }));
+  setTimeout(() => afficherEcran('screen-fin'), 600);
+}
+
+function afficherFinDePartieLocal(gagnant) {
+  const joueurHumain = SOLO.joueurs.find(j => j.id === STATE.joueurId);
+  if (joueurHumain) {
+    sauvegarderScore(joueurHumain.nom, joueurHumain.vies,
+      SOLO.paysJouesList.length, STATE.nbTours,
+      gagnant && gagnant.id === STATE.joueurId ? 1 : 0);
+  }
+  document.getElementById('winner-name').textContent = gagnant ? gagnant.nom : '—';
+  document.getElementById('stat-pays').textContent = SOLO.paysJouesList.length;
+  document.getElementById('stat-tours').textContent = STATE.nbTours;
+  document.getElementById('stat-vies').textContent = gagnant?.vies || 0;
+  afficherEcran('screen-fin');
+}
+
+function retourAccueil() {
+  stopChrono();
+  EN_PAUSE = false;
+  if (STATE.ws) { STATE.ws.close(); STATE.ws = null; }
+  document.getElementById('flags-inner').innerHTML = '';
+  document.getElementById('modal-pause').classList.add('hidden');
+  document.getElementById('modal-quitter').classList.add('hidden');
+  afficherEcran('screen-accueil');
+}
+
+function rejouerMeme() {
+  stopChrono();
+  if (STATE.modeConnecte) {
+    retourAccueil();
+  } else {
+    // Réinitialiser SOLO sans passer par le lobby
+    const vies = SOLO.viesDepart;
+    SOLO.joueurs = SOLO.joueurs.map(j => ({ ...j, vies, en_vie: true }));
+    SOLO.indexTour    = 0;
+    SOLO.sequence     = '';
+    SOLO.paysJoues    = new Set();
+    SOLO.paysJouesList= [];
+    SOLO.joueurFautif = null;
+    STATE.nbTours     = 0;
+    demarrerSolo();  // repart directement en jeu
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  BUG05 FIX — PAUSE & QUITTER
+// ══════════════════════════════════════════════════
+let EN_PAUSE = false;
+
+function basculerPause() {
+  EN_PAUSE = !EN_PAUSE;
+  const btn = document.getElementById('btn-pause');
+  if (EN_PAUSE) {
+    clearInterval(STATE.chronoInterval);
+    document.querySelectorAll('.key').forEach(k => k.disabled = true);
+    document.getElementById('btn-langue').disabled = true;
+    btn.textContent = '▶ Reprendre';
+    btn.style.background = 'rgba(0,201,167,0.12)';
+    btn.style.color = 'var(--teal)';
+    btn.style.borderColor = 'rgba(0,201,167,0.3)';
+    // Modal pause
+    document.getElementById('modal-pause').classList.remove('hidden');
+  } else {
+    reprendreDepuisPause();
+  }
+}
+
+function reprendreDepuisPause() {
+  EN_PAUSE = false;
+  document.getElementById('modal-pause').classList.add('hidden');
+  const btn = document.getElementById('btn-pause');
+  btn.textContent = '⏸ Pause';
+  btn.style.background = 'rgba(255,255,255,0.06)';
+  btn.style.color = 'var(--paper)';
+  btn.style.borderColor = 'rgba(255,255,255,0.1)';
+  // Relancer chrono si temps restant
+  if (STATE.tempsRestant > 0) {
+    STATE.chronoInterval = setInterval(() => {
+      STATE.tempsRestant--;
+      actualiserChrono();
+      if (STATE.tempsRestant <= 0) {
+        clearInterval(STATE.chronoInterval);
+        if (!STATE.modeConnecte && STATE.estMonTour) perdreVieLocal('⏰ Temps écoulé !');
+      }
+    }, 1000);
+  }
+  // Réactiver clavier selon le tour
+  document.querySelectorAll('.key').forEach(k => k.disabled = !STATE.estMonTour);
+}
+
+function confirmerQuitter() {
+  // Mettre en pause le chrono pendant la popup
+  clearInterval(STATE.chronoInterval);
+  document.getElementById('modal-quitter').classList.remove('hidden');
+}
+
+function annulerQuitter() {
+  document.getElementById('modal-quitter').classList.add('hidden');
+  // Reprendre le chrono si pas en pause
+  if (!EN_PAUSE && STATE.tempsRestant > 0) {
+    STATE.chronoInterval = setInterval(() => {
+      STATE.tempsRestant--;
+      actualiserChrono();
+      if (STATE.tempsRestant <= 0) {
+        clearInterval(STATE.chronoInterval);
+        if (!STATE.modeConnecte && STATE.estMonTour) perdreVieLocal('⏰ Temps écoulé !');
+      }
+    }, 1000);
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  BUG04 FIX — VOIR LES PAYS JOUÉS
+// ══════════════════════════════════════════════════
+function afficherPaysJoues() {
+  const liste = STATE.modeConnecte ? (STATE.paysJouesList || []) : SOLO.paysJouesList;
+  const modal = document.getElementById('modal-pays-joues');
+  const content = document.getElementById('pays-joues-list');
+  content.innerHTML = '';
+
+  document.getElementById('pays-joues-count').textContent =
+    `🗺️ ${liste.length} mot${liste.length > 1 ? 's' : ''} joué${liste.length > 1 ? 's' : ''}`;
+
+  if (!liste.length) {
+    content.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Aucun pays joué</div>';
+  } else {
+    liste.forEach(item => {
+      const valeur = item._valeur_jouee || item.nom || '';
+      const code = item.code || 'fr';
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)';
+
+      const affichage = (STATE.modeMixte && item._valeur_jouee && item._valeur_jouee !== item.nom)
+        ? `${item._valeur_jouee} <span style="color:var(--muted);font-size:11px">(${item.nom})</span>`
+        : valeur;
+
+      div.innerHTML = `
+        <img src="https://flagcdn.com/w80/${code}.png"
+             style="width:48px;height:32px;object-fit:cover;border-radius:4px;border:1px solid rgba(255,255,255,0.1);flex-shrink:0"
+             onerror="this.style.display='none'">
+        <span style="font-size:14px">${affichage}</span>
+      `;
+      content.appendChild(div);
+    });
+  }
+
+  modal.classList.remove('hidden');
+}
+
+// ══════════════════════════════════════════════════
+//  TOASTS
+// ══════════════════════════════════════════════════
+function toast(msg, type = '') {
+  const container = document.getElementById('toast-container');
+  const div = document.createElement('div');
+  div.className = 'toast' + (type ? ` ${type}` : '');
+  div.textContent = msg;
+  container.appendChild(div);
+  setTimeout(() => {
+    div.classList.add('exit');
+    setTimeout(() => div.remove(), 300);
+  }, 3500);
+}
+
+
+
+// ══════════════════════════════════════════════════
+//  TUTORIEL
+// ══════════════════════════════════════════════════
+let _tutoStep = 0;
+const TUTO_TOTAL = 3;
+
+function afficherTuto() {
+  _tutoStep = 0;
+  document.getElementById('tuto-overlay').classList.remove('hidden');
+  document.getElementById('tuto-overlay').style.display = 'flex';
+  _syncTuto();
+}
+
+function fermerTuto() {
+  document.getElementById('tuto-overlay').classList.add('hidden');
+  document.getElementById('tuto-overlay').style.display = '';
+  localStorage.setItem('paysfatal_tuto', '1');
+}
+
+function tutoSuivant() {
+  _tutoStep++;
+  if (_tutoStep >= TUTO_TOTAL) { fermerTuto(); return; }
+  _syncTuto();
+}
+
+function _syncTuto() {
+  document.querySelectorAll('.tuto-slide').forEach((s, i) => {
+    s.classList.toggle('hidden', i !== _tutoStep);
+  });
+  document.querySelectorAll('.tuto-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === _tutoStep);
+  });
+  const btn = document.getElementById('tuto-next');
+  if (btn) btn.textContent = _tutoStep === TUTO_TOTAL - 1 ? '🎮 Jouer !' : 'Suivant →';
+}
+
+// ══════════════════════════════════════════════════
+//  SONS — Web Audio API (zéro fichier externe)
+// ══════════════════════════════════════════════════
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _actx = null;
+function getACtx() {
+  if (!_actx) _actx = new AudioCtx();
+  return _actx;
+}
+
+// Son muet par défaut — activé au premier geste utilisateur
+let sonsActifs = localStorage.getItem('sons') !== 'off';
+
+function jouerSon(type) {
+  if (!sonsActifs) return;
+  try {
+    const ctx = getACtx();
+    const g = ctx.createGain();
+    g.connect(ctx.destination);
+
+    switch(type) {
+      case 'touche': {
+        // Clic court et sec
+        const o = ctx.createOscillator();
+        o.connect(g);
+        o.type = 'sine';
+        o.frequency.setValueAtTime(880, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.06);
+        g.gain.setValueAtTime(0.18, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+        o.start(); o.stop(ctx.currentTime + 0.07);
+        break;
+      }
+      case 'erreur': {
+        // Buzzer grave
+        const o = ctx.createOscillator();
+        o.connect(g);
+        o.type = 'sawtooth';
+        o.frequency.setValueAtTime(180, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.25);
+        g.gain.setValueAtTime(0.22, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        o.start(); o.stop(ctx.currentTime + 0.25);
+        break;
+      }
+      case 'vie': {
+        // Impact sourd — perte de vie
+        const o = ctx.createOscillator();
+        o.connect(g);
+        o.type = 'square';
+        o.frequency.setValueAtTime(220, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.3);
+        g.gain.setValueAtTime(0.3, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        o.start(); o.stop(ctx.currentTime + 0.3);
+        break;
+      }
+      case 'complet': {
+        // Ding ascendant — mot complété
+        [0, 0.08, 0.18].forEach((t, i) => {
+          const o = ctx.createOscillator();
+          const gn = ctx.createGain();
+          o.connect(gn); gn.connect(ctx.destination);
+          o.type = 'sine';
+          o.frequency.value = [523, 659, 784][i];
+          gn.gain.setValueAtTime(0.15, ctx.currentTime + t);
+          gn.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.18);
+          o.start(ctx.currentTime + t);
+          o.stop(ctx.currentTime + t + 0.18);
+        });
+        break;
+      }
+      case 'victoire': {
+        // Fanfare joyeuse
+        const notes = [523,659,784,1047];
+        notes.forEach((freq, i) => {
+          const o = ctx.createOscillator();
+          const gn = ctx.createGain();
+          o.connect(gn); gn.connect(ctx.destination);
+          o.type = 'triangle';
+          o.frequency.value = freq;
+          gn.gain.setValueAtTime(0.18, ctx.currentTime + i * 0.12);
+          gn.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.25);
+          o.start(ctx.currentTime + i * 0.12);
+          o.stop(ctx.currentTime + i * 0.12 + 0.25);
+        });
+        break;
+      }
+      case 'langue': {
+        // Alerter — son montant-descendant
+        const o = ctx.createOscillator();
+        o.connect(g);
+        o.type = 'sine';
+        o.frequency.setValueAtTime(660, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.15);
+        g.gain.setValueAtTime(0.2, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+        o.start(); o.stop(ctx.currentTime + 0.2);
+        break;
+      }
+      case 'emoji': {
+        // Pop léger
+        const o = ctx.createOscillator();
+        o.connect(g);
+        o.type = 'sine';
+        o.frequency.setValueAtTime(1200, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.08);
+        g.gain.setValueAtTime(0.12, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        o.start(); o.stop(ctx.currentTime + 0.08);
+        break;
+      }
+    }
+  } catch(e) {}
+}
+
+// ── Musique d'ambiance (Kenney CC0) ─────────────
+// Plusieurs pistes en rotation, servies par gamesounds.xyz
+// URL du fichier ambiance.mp3 à placer dans ton repo GitHub
+// → télécharge un MP3 libre sur pixabay.com/music (Electronic + Happy)
+// → renomme-le ambiance.mp3 et dépose-le dans ton repo
+const _AMBIANCE_URL = "https://raw.githubusercontent.com/LAantaaa/pays-game/main/ambiance.mp3";
+let _ambianceAudio = null;
+
+function demarrerAmbiance() {
+  if (!sonsActifs || _ambianceAudio) return;
+  try {
+    const audio = new Audio(_AMBIANCE_URL);
+    audio.volume = 0.18;
+    audio.loop = true;
+    audio.play().catch(() => {});
+    _ambianceAudio = audio;
+  } catch(e) {}
+}
+
+function arreterAmbiance() {
+  if (_ambianceAudio) {
+    _ambianceAudio.pause();
+    _ambianceAudio = null;
+  }
+}
+
+// Activer/couper l'ambiance quand on toggle les sons
+function toggleSons() {
+  sonsActifs = !sonsActifs;
+  localStorage.setItem('sons', sonsActifs ? 'on' : 'off');
+  const btn = document.getElementById('btn-sons');
+  if (btn) btn.textContent = sonsActifs ? '🔊' : '🔇';
+  if (sonsActifs) demarrerAmbiance(); else arreterAmbiance();
+  toast(sonsActifs ? '🔊 Sons activés' : '🔇 Sons désactivés', '');
+}
+
+
+// ══════════════════════════════════════════════════
+//  SCORES PERSISTANTS — Top 10 localStorage
+// ══════════════════════════════════════════════════
+function sauvegarderScore(nomJoueur, viesRestantes, nbPays, nbTours, gagne) {
+  try {
+    const scores = JSON.parse(localStorage.getItem('paysfatal_scores') || '[]');
+    scores.push({
+      nom: nomJoueur, vies: viesRestantes, pays: nbPays,
+      tours: nbTours, gagne, date: new Date().toLocaleDateString('fr'), ts: Date.now()
+    });
+    scores.sort((a, b) => {
+      if (b.gagne !== a.gagne) return b.gagne - a.gagne;
+      if (b.vies !== a.vies) return b.vies - a.vies;
+      return b.pays - a.pays;
+    });
+    localStorage.setItem('paysfatal_scores', JSON.stringify(scores.slice(0, 10)));
+  } catch(e) {}
+}
+
+function afficherScores() {
+  try {
+    const scores = JSON.parse(localStorage.getItem('paysfatal_scores') || '[]');
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'z-index:9999;display:flex';
+    const rows = scores.length ? scores.map((s, i) => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;
+           border-bottom:1px solid rgba(255,255,255,0.06);
+           color:${i < 3 ? 'var(--amber)' : 'var(--paper)'}">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;width:28px;text-align:center">
+          ${['🥇','🥈','🥉'][i] || (i+1)}
+        </span>
+        <div style="flex:1">
+          <div style="font-weight:600">${escapeHtml(s.nom)} ${s.gagne ? '👑' : ''}</div>
+          <div style="font-size:11px;color:var(--muted)">${s.date}</div>
+        </div>
+        <div style="text-align:right;font-size:12px;font-family:'DM Mono',monospace">
+          <div>❤️ ${s.vies}</div><div>🌍 ${s.pays}</div>
+        </div>
+      </div>`).join('')
+      : '<div style="color:var(--muted);text-align:center;padding:20px">Aucun score enregistré.</div>';
+    modal.innerHTML = `
+      <div class="modal-box" style="max-height:80vh;overflow:hidden;display:flex;flex-direction:column">
+        <span class="modal-emoji">🏆</span>
+        <div class="modal-title">MEILLEURS SCORES</div>
+        <div style="overflow-y:auto;flex:1">${rows}</div>
+        <div class="modal-actions" style="margin-top:12px;gap:8px">
+          <button class="btn btn-secondary" onclick="localStorage.removeItem('paysfatal_scores');
+            this.closest('.modal-overlay').remove();toast('Scores effacés','warn')">Effacer</button>
+          <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove()">Fermer</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+  } catch(e) { toast('Erreur lecture scores', 'error'); }
+}
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+function init() {
+  construireClavier();
+  STATE.modeConnecte = false;
+
+  // Afficher le premier step
+  allerStep('step-choix');
+
+  // Tutoriel au premier lancement
+  if (!localStorage.getItem('paysfatal_tuto')) {
+    setTimeout(afficherTuto, 600);
+  }
+
+  // Son d'ambiance — démarré au premier clic (politique navigateur)
+  document.addEventListener('click', () => {
+    if (sonsActifs) demarrerAmbiance();
+  }, { once: true });
+
+  // Précharger les pays en arrière-plan dès le démarrage
+  // (évite le bug "séquences non reconnues" au premier lancement)
+  chargerPaysLocal('fr');
+
+  // Rejoindre via lien partagé (?room=ABCDEF)
+  const params = new URLSearchParams(window.location.search);
+  const roomFromUrl = params.get('room');
+  if (roomFromUrl && roomFromUrl.length === 6) {
+    allerStep('step-rejoindre');
+    document.getElementById('rejoindre-code').value = roomFromUrl.toUpperCase();
+    toast(`🔗 Code détecté : ${roomFromUrl.toUpperCase()} — entrez votre nom et rejoignez !`, '');
+  }
+}
+
+init();
+</script>
+
+<!-- ═══════════════════════════════════════════════
+     TUTORIEL — Premier lancement
+═══════════════════════════════════════════════ -->
+<div id="tuto-overlay" class="modal-overlay hidden" style="z-index:10000;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border-hi);border-radius:var(--r-xl);
+              padding:32px 28px;max-width:420px;width:90%;position:relative">
+    <!-- Slides -->
+    <div id="tuto-slides">
+
+      <div class="tuto-slide" data-slide="0">
+        <div style="font-size:64px;text-align:center;margin-bottom:16px">🌍</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--amber);text-align:center;margin-bottom:12px">LE PAYS FATAL</div>
+        <div style="color:var(--paper);font-size:15px;line-height:1.7;text-align:center">
+          Ajoute une lettre… mais ne sois jamais celui qui achève le pays. 😉
+        </div>
+      </div>
+
+      <div class="tuto-slide hidden" data-slide="1">
+        <div style="font-size:48px;text-align:center;margin-bottom:16px">⌨️</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--amber);text-align:center;margin-bottom:16px">COMMENT JOUER</div>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--paper)">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <span style="font-size:20px;flex-shrink:0">🔤</span>
+            <span>À chaque tour tu ajoutes <strong>une lettre</strong>. La séquence doit toujours commencer au moins un nom de pays.</span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <span style="font-size:20px;flex-shrink:0">💀</span>
+            <span>Si tu <strong>complètes un nom de pays</strong> ou si tu poses une lettre <strong>impossible</strong>, tu perds une vie.</span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <span style="font-size:20px;flex-shrink:0">🗣️</span>
+            <span><strong>Langue au chat</strong> : tu penses que l'adversaire ment ? Interpelle-le — il doit prouver qu'un pays existe.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tuto-slide hidden" data-slide="2">
+        <div style="font-size:48px;text-align:center;margin-bottom:16px">⚡</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--amber);text-align:center;margin-bottom:16px">LES MODES</div>
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--paper)">
+          <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px">
+            🎯 <strong>Classique</strong> — 15 secondes, 10 vies, séquence libre
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px">
+            ⚡ <strong>Blitz</strong> — 5 secondes max par lettre, réfléchis vite
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px">
+            💀 <strong>Survie</strong> — 1 seule vie. La moindre erreur = éliminé
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px">
+            🔥 <strong>Accélération</strong> — le chrono perd 1s à chaque tour
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Navigation -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:28px">
+      <div style="display:flex;gap:6px">
+        <div class="tuto-dot active" data-dot="0"></div>
+        <div class="tuto-dot" data-dot="1"></div>
+        <div class="tuto-dot" data-dot="2"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="tuto-skip" onclick="fermerTuto()"
+          style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:8px 12px">
+          Passer
+        </button>
+        <button id="tuto-next" onclick="tutoSuivant()"
+          class="btn btn-primary" style="padding:10px 24px">
+          Suivant →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
